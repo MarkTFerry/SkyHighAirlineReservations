@@ -1,0 +1,126 @@
+.View {
+    margin-top: 3%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+    display: none;
+    
+    border:1px solid #000000;
+    padding:50px 40px;
+    border-radius:25px;
+    
+    text-align: center;
+}
+
+.Login,.Register {
+    margin-top: 10%;
+    width: 25%;
+}
+
+.ViewBookedFlights {
+    width: 80%;
+}
+
+.View.Active {
+    display: block;
+}
+
+.LoginHeader {
+    text-align: right;
+    display: block;
+}
+
+.Loggedin > .LoginHeader {
+    display: none;
+}
+
+.LogoutHeader {
+    text-align: right;
+    display: none;
+}
+
+.Loggedin > .LogoutHeader {
+    display: block;
+}
+
+h1 {
+    font-size:48px;
+}
+
+button {
+	margin-top: 20px;
+    background-color:#ffffff;
+	border:1px solid #000000;
+    border-radius:12px;
+	display:inline-block;
+	color:#000000;
+	font-family:Arial;
+	font-size:36px;
+	height:50px;
+	text-align:center;
+    outline: none;
+}
+
+button.close {
+    position:relative;
+    float:right;
+    top:-30px;
+    height:25px;
+    font-size:18px;
+}
+
+button.locked {
+    background-color:#AAAAAA;
+}
+
+button:hover {
+	background-color:#E1E9F2;
+}
+
+button.confirm:hover {
+	background-color:#ADF0AE;
+}
+
+button.cancel:hover {
+	background-color:#F2E1E1;
+}
+
+button.close:hover {
+    background-color:#F57373;
+}
+
+button:active {
+	position:relative;
+	top:1px;
+}
+
+button.close:active {
+	position:relative;
+	top:-29px;
+}
+
+table {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+}
+
+td {
+    vertical-align: top;
+    padding-right: 2em;
+    padding-bottom: 1em;
+}
+
+.RatesTable,.BookedFlightsTable {
+    border-spacing:0px;
+    font-size:18pt;
+}
+
+.RatesTable tr:first-child td, .BookedFlightsTable tr:first-child td{
+    background-color:#CCD6DB;
+}
+
+.RatesTable td, .BookedFlightsTable td{
+    border:1px solid #000000;
+    padding:10px;
+}

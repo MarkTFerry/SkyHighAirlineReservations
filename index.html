@@ -1,0 +1,145 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Sky High Airline Reservations</title>
+
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="jquery-1.10.2.min.js"></script>
+<script src="common.js"></script>
+
+</head>
+
+
+<body onLoad="updateDashboard()">
+
+<div class="View Dashboard Active">
+    <div class="LoginHeader">
+        <a href="javascript:changeView('Login')">Login</a> | 
+        <a href="javascript:changeView('Register')">Register</a>
+    </div>
+    <div class="LogoutHeader">
+        <span id="HeaderUser"></span> | <a href="javascript:logout()">Logout</a>
+    </div>
+    
+    <h1>Sky High Airline Reservations</h1>
+    <br>
+    <button onclick="changeView('CheckRates')">Check Rates</button><br>
+    <button class="LoginRequired" onclick="changeView('BookFlight')">Book A Flight</button><br>
+    <button class="LoginRequired" onclick="changeView('ViewBookedFlights')">View Booked Flights</button>
+
+</div>
+
+<div class="View CheckRates">
+    <button class="close" onclick="changeView('Dashboard')">X</button>
+    <h1>Check Rates</h1>    
+    <table>
+    <tr><td><input type="radio" name="type" id="ratesDomestic" onClick="getRates()">Domestic</input>
+    </td><td><input type="radio" name="type" id="ratesInternational" onClick="getRates()">International</input>
+    </tr><tr>
+    <td><input type="radio" name="class" id="ratesEconomic" onClick="getRates()">Economic</input>
+    </td><td><input type="radio" name="class" id="ratesBusiness" onClick="getRates()">Business</input>
+    </tr></table>
+    
+    <table class="RatesTable">
+        <tr>
+            <td><b>From</b></td>
+            <td><b>To</b></td>
+            <td><b>Price</b></td>
+            <td><b>Time</b></td>
+        </tr>
+    </table>
+</div>
+
+<div class="View Login">
+    <h1>Login</h1>
+    Username: <input type="text" id="loginUser"><br>
+    Password: <input type="password" id="loginPass"><br>
+    <button class="cancel" onclick="changeView('Dashboard')">Cancel</button>
+    <button class="confirm" onclick="login()">Login</button>
+</div>
+
+<div class="View Register">
+    <h1>Register</h1>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    Username: <input type="text" id="registerUser"><br>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+    Password: <input type="password" id="registerPass1"><br>
+    Confirm Password: <input type="password" id="registerPass2"><br>
+    <button class="cancel" onclick="changeView('Dashboard');return false;">Cancel</button>
+    <button class="confirm" onclick="register();return false;">Register</button>
+</div>
+
+<div class="View BookFlight">
+    <button class="close" onclick="changeView('Dashboard')">X</button>
+    <h1>Book A Flight</h1>
+    <form name="BookFlightForm">
+    <table><tr>
+    <td>
+        <h2>Booking Details</h2>
+        From: <select name="from"></select><br>
+        To: <select name="to"></select><br>
+        Booking Date: <input type="text" name="date" value="DD/MM/YYYY" size="10"><br>
+        Class:  <input type="radio" name="type" value="Domestic" checked>Domestic</input>
+                <input type="radio" name="type" value="International" checked>International</input><br>
+        Type:   <input type="radio" name="class" value="Economic" checked>Economic</input>
+                <input type="radio" name="class" value="Business" checked>Business</input>
+    </td><td>
+        <h2>Passenger Details</h2>
+        Adults (12+): <select name="adults">
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      </select><br>
+        Children (2-11): <select name="children">
+                         <option value="0">0</option>
+                         <option value="1">1</option>
+                         <option value="2">2</option>
+                         <option value="3">3</option>
+                         <option value="4">4</option>
+                         </select><br>
+        Infants (under 2): <select name="infants">
+                           <option value="0">0</option>
+                           <option value="1">1</option>
+                           <option value="2">2</option>
+                           <option value="3">3</option>
+                           </select><br>
+    </td>
+    </tr></table>
+    
+    <button onclick="return false;">Find Flight</button>
+    
+    </form>1
+</div>
+
+<div class="View TicketSummary">
+    <button class="close" onclick="changeView('Dashboard')">X</button>
+    <h1>Ticket Summary</h1>
+    <div class="TicketContent"></div>
+</div>
+
+<div class="View ViewBookedFlights">
+    <button class="close" onclick="changeView('Dashboard')">X</button>
+    <h1>View Booked Flights</h1>
+    <table class="BookedFlightsTable">
+        <tr>
+            <td><b>From</b></td>
+            <td><b>To</b></td>
+            <td><b>Class</b></td>
+            <td><b>Type</b></td>
+            <td><b>Traveling Date</b></td>
+            <td><b>Departure Time</b></td>
+            <td><b>Total Price</b></td>
+            <td><b>Adults</b></td>
+            <td><b>Children</b></td>
+            <td><b>Infants</b></td>
+            <td><b>Ticket Number</b></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+
+</body>
