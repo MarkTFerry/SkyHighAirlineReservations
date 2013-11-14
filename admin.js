@@ -40,7 +40,26 @@ function login() {
     request.adminPass = adminPass;
     
     if($('#loginType')[0].value == 'SkyHigh'){
-        // normal login
+        request.action = 'adminLogin';
+        request = JSON.stringify(request);
+        $.post( "admin.php", { request: request }, function( response ) {
+            try {
+                response = jQuery.parseJSON(response);
+            } catch(e) {
+                response = {};
+            }
+            
+            if(response.error){
+                alert(response.error);
+            } else if(response.success){
+                changeView('Dashboard');
+            } else {
+                alert(unexpectedError);
+            }
+        })
+        .fail(function(){
+            alert(connectionError);
+        });
     } else {
         request.action = 'setupServer';
         request = JSON.stringify(request);

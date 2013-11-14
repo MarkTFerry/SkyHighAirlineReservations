@@ -26,6 +26,30 @@ $response = new stdClass();
 
 switch ($request->action)
 {
+case "adminLogin":
+    $passwordHashed = sha1($request->adminPass.$request->adminUser.$PassSaltConstant.$AdminSaltConstant);
+    try {
+        // Parameters are defined in common.php
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
+
+        $statement = $connection->prepare("SELECT * FROM admins WHERE Username = :user AND Password = :pass");
+        $statement->bindParam(':user', $request->adminUser);
+        $statement->bindParam(':pass', $passwordHashed);
+        
+        $statement->execute();
+        
+        if($statement->fetch()){
+            die('{"success":1}');
+        } else {
+            die('{"error":"The username or password you entered is incorrect. Please try again."}');
+        }
+        
+        // Close the connection
+        $connection = null;
+    } catch(PDOException $e) {
+        error_log($e->getMessage());
+    }
+    break;
 case "setupServer":
     $connection = mysql_connect($DB_HOST, $request->adminUser, $request->adminPass);
     if (!$connection) {
@@ -84,6 +108,14 @@ case "setupServer":
                                         ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
         $statement->execute();
         $response->results = $response->results."<br><br>Created table for users";
+        
+        $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `admins` (
+                                          `Username` varchar(100) NOT NULL,
+                                          `Password` varchar(40) NOT NULL,
+                                          PRIMARY KEY (`Username`)
+                                        ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+        $statement->execute();
+        $response->results = $response->results."<br><br>Created table for admins";
         
         $defaultUser = "SkyHighAdmin";
         $defaultPass = "password";
