@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Sky High Airline Reservations - Admin Portal</title>
+
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="jquery-1.10.2.min.js"></script>
+<script src="admin.js"></script>
+
+</head>
+
+
+<body>
+
+<div class="View LoginAdmin Active">
+    <h1>Sky High Airline Reservations</h1>
+    <h2>Admin Portal</h2>
+    <br>
+    Username: <input type="text" id="loginUser"><br>
+    Password: <input type="password" id="loginPass"><br>
+    Login Type: <select id="loginType">
+                    <option value="SkyHigh">SkyHigh Admin</option>
+                    <option value="MySQL">MySQL (Re-run Setup)</option>
+                </select>
+    <br>
+    <button onClick="login()">Login</button>
+</div>
+
+<div class="View Dashboard">
+    <h1>Sky High Airline Reservations</h1>
+    <h2>Admin Portal</h2>
+    <br>
+    Select an action:<br>
+    <select id="action">
+        <option value="addAdmin">Add an admin account</option>
+        <option value="viewAdmin">View and delete admin accounts</option>
+        <option value="addUser">Add a user account</option>
+        <option value="viewUser">View and delete user accounts</option>
+        <option value="addRate">Add a rate</option>
+        <option value="viewRate">View and delete rates</option>
+        <option value="importRates">Import rates</option>
+        <option value="exportRates">Export rates</option>
+        <option value="addBooking">Add a flight booking</option>
+        <option value="viewBooking">View and delete flight bookings</option>
+    </select>
+    
+    <br>
+    
+    <div id="formFields"></div>
+    
+    <button>Submit</button>
+</div>
+
+<div class="View SetupResults">
+    <h1>Setup Results</h1>
+    
+    <div class="resultsFrame"></div>
+    
+    <br>
+    <button onclick="changeView('LoginAdmin')">OK</button>
+    
+</div>
+
+</body>
