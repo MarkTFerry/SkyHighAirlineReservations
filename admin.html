@@ -9,7 +9,6 @@
 
 </head>
 
-
 <body>
 
 <div class="View LoginAdmin Active">
@@ -30,8 +29,8 @@
     <h1>Sky High Airline Reservations</h1>
     <h2>Admin Portal</h2>
     <br>
-    Select an action:<br>
-    <select id="action">
+    Select an action: <br>
+    <select id="action" onChange="changeUI(this.value)">
         <option value="addAdmin">Add an admin account</option>
         <option value="viewAdmin">View and delete admin accounts</option>
         <option value="addUser">Add a user account</option>
@@ -44,11 +43,11 @@
         <option value="viewBooking">View and delete flight bookings</option>
     </select>
     
-    <br>
+    <br><br><br>
     
     <div id="formFields"></div>
     
-    <button>Submit</button>
+    <button onclick="submitForm()">Submit</button>
 </div>
 
 <div class="View SetupResults">

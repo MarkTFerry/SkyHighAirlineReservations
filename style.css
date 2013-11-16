@@ -115,16 +115,16 @@ td {
     padding-bottom: 1em;
 }
 
-.RatesTable,.BookedFlightsTable {
+.RatesTable,.BookedFlightsTable,.AdminTable {
     border-spacing:0px;
     font-size:18pt;
 }
 
-.RatesTable tr:first-child td, .BookedFlightsTable tr:first-child td{
+.RatesTable tr:first-child td, .BookedFlightsTable tr:first-child td, .AdminTable tr:first-child td{
     background-color:#CCD6DB;
 }
 
-.RatesTable td, .BookedFlightsTable td{
+.RatesTable td, .BookedFlightsTable td, .AdminTable td{
     border:1px solid #000000;
     padding:10px;
 }

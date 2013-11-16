@@ -9,6 +9,31 @@ $AdminSaltConstant = "AdminPortalPassword";
 $missingParametersError = '{"error":"Your request is missing one or more parameters."}';
 $SQLerror = '{"error":"SQL statement execution failed. View the error log for more details."}';
 
+function authenticateAdmin($request){
+    global $PassSaltConstant, $AdminSaltConstant, $DB_HOST, $DB_NAME, $USER_SELECT, $PASS_SELECT;
+    $userUpper = strtoupper($request->adminUser);
+    $passwordHashed = sha1($request->adminPass.$userUpper.$PassSaltConstant.$AdminSaltConstant);
+    try {
+        // Parameters are defined in common.php
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
+
+        $statement = $connection->prepare("SELECT * FROM admins WHERE Username = :user AND Password = :pass");
+        $statement->bindValue(':user', $userUpper);
+        $statement->bindValue(':pass', $passwordHashed);
+        
+        $statement->execute();
+        
+        if(!$statement->fetch()){
+            die('{"error":"The username or password you entered is incorrect. Please try again."}');
+        }
+        
+        // Close the connection
+        $connection = null;
+    } catch(PDOException $e) {
+        error_log($e->getMessage());
+    }
+}
+
 if(!isset($_POST["request"])){
     die('{"error":"Request string missing or empty."}');
 }
@@ -27,21 +52,93 @@ $response = new stdClass();
 switch ($request->action)
 {
 case "adminLogin":
-    $passwordHashed = sha1($request->adminPass.$request->adminUser.$PassSaltConstant.$AdminSaltConstant);
+    authenticateAdmin($request);
+    $response->success = 1;
+    break;
+case "addAdmin":
+case "addUser":
+    authenticateAdmin($request);
+    
+    if( !isset($request->user) || !isset($request->pass) ){
+        die($missingParametersError);
+    }
+    
     try {
-        // Parameters are defined in common.php
-        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
 
-        $statement = $connection->prepare("SELECT * FROM admins WHERE Username = :user AND Password = :pass");
-        $statement->bindParam(':user', $request->adminUser);
-        $statement->bindParam(':pass', $passwordHashed);
+        $userUpper = strtoupper($request->user);
+        if($request->action == "addAdmin"){
+            $statement = $connection->prepare("INSERT INTO admins (Username,Password) VALUES (:user,:pass)");
+            $passHashed = sha1($request->pass.$userUpper.$PassSaltConstant.$AdminSaltConstant);
+        } else {
+            $statement = $connection->prepare("INSERT INTO users (Username,Password) VALUES (:user,:pass)");
+            $passHashed = sha1($request->pass.$userUpper.$PassSaltConstant);
+        }
         
+        $statement->bindValue(":user", $userUpper);
+        $statement->bindValue(":pass", $passHashed);
         $statement->execute();
         
-        if($statement->fetch()){
-            die('{"success":1}');
+        if($statement->rowCount() > 0){
+            $response->success = 1;
         } else {
-            die('{"error":"The username or password you entered is incorrect. Please try again."}');
+            $response->error = "An account with that name already exists.";
+        }
+        
+        // Close the connection
+        $connection = null;
+    } catch(PDOException $e) {
+        error_log($e->getMessage());
+    }
+    break;
+case "viewAdmin":
+case "viewUser":
+    authenticateAdmin($request);
+    try {
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
+
+        if($request->action == "viewAdmin"){
+            $statement = $connection->prepare("SELECT * FROM admins");
+        } else {
+            $statement = $connection->prepare("SELECT * FROM users");
+        }
+        
+        $statement->execute();
+        $result = $statement->fetchAll();
+        $response->result = json_encode($result);
+        
+        // Close the connection
+        $connection = null;
+    } catch(PDOException $e) {
+        error_log($e->getMessage());
+    }
+    break;
+case "deleteAdmin":
+case "deleteUser":
+    authenticateAdmin($request);
+    
+    if(!isset($request->user)){
+        die($missingParametersError);
+    }
+    
+    try {
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_DELETE, $PASS_DELETE);
+
+        $upperUser = strtoupper($request->user);
+        
+        if($request->action == "deleteAdmin"){
+            $statement = $connection->prepare("DELETE FROM admins WHERE Username = :user");
+        } else {
+            $statement = $connection->prepare("DELETE FROM users WHERE Username = :user");
+        }        
+        
+        $statement->bindValue(':user', $upperUser);
+        $statement->execute();
+        
+        if($statement->rowCount() > 0){
+            $response->success = 1;
+        } else {
+            $response->error = "An account with that name does not exist.";
         }
         
         // Close the connection
@@ -117,7 +214,7 @@ case "setupServer":
         $statement->execute();
         $response->results = $response->results."<br><br>Created table for admins";
         
-        $defaultUser = "SkyHighAdmin";
+        $defaultUser = "SKYHIGHADMIN";
         $defaultPass = "password";
         $defaultPassHashed = sha1($defaultPass.$defaultUser.$PassSaltConstant.$AdminSaltConstant);
         
@@ -135,7 +232,7 @@ case "setupServer":
         $statement->execute();
         $response->results = $response->results."<br><br>Added user for INSERT";
         
-        $statement = $connection->prepare("GRANT DELETE ON *.* TO '".$USER_DELETE."'@'localhost' IDENTIFIED BY '".$PASS_DELETE."';");
+        $statement = $connection->prepare("GRANT SELECT, DELETE ON *.* TO '".$USER_DELETE."'@'localhost' IDENTIFIED BY '".$PASS_DELETE."';");
         $statement->execute();
         $response->results = $response->results."<br><br>Added user for DELETE";
         
