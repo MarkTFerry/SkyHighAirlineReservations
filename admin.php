@@ -93,14 +93,17 @@ case "addUser":
     break;
 case "viewAdmin":
 case "viewUser":
+case "viewRate":
     authenticateAdmin($request);
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
 
         if($request->action == "viewAdmin"){
             $statement = $connection->prepare("SELECT * FROM admins");
-        } else {
+        } else if($request->action == "viewUser"){
             $statement = $connection->prepare("SELECT * FROM users");
+        } else {
+            $statement = $connection->prepare("SELECT * FROM rates");
         }
         
         $statement->execute();
@@ -139,6 +142,66 @@ case "deleteUser":
             $response->success = 1;
         } else {
             $response->error = "An account with that name does not exist.";
+        }
+        
+        // Close the connection
+        $connection = null;
+    } catch(PDOException $e) {
+        error_log($e->getMessage());
+    }
+    break;
+case "addRate":
+    authenticateAdmin($request);
+    
+    if( !isset($request->type) || !isset($request->classVal) || !isset($request->from)
+        || !isset($request->to)|| !isset($request->price)|| !isset($request->timeVal)){
+        die($missingParametersError);
+    }
+    
+    try {
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
+
+        //$statement = $connection->prepare("INSERT INTO rates (ID,Type,Class,From,To,Price,Time) VALUES (NULL,:Type,:Class,:From,:To,:Price,:Time)");
+        $statement = $connection->prepare("INSERT INTO rates (`ID`,`Type`,`Class`,`From`,`To`,`Price`,`Time`) 
+                                           VALUES (NULL,:Type,:Class,:From,:To,:Price,:Time)");
+        $statement->bindValue(":Type", $request->type, PDO::PARAM_INT);
+        $statement->bindValue(":Class", $request->classVal, PDO::PARAM_INT);
+        $statement->bindValue(":From", $request->from);
+        $statement->bindValue(":To", $request->to);
+        $statement->bindValue(":Price", $request->price, PDO::PARAM_INT);
+        $statement->bindValue(":Time", $request->timeVal);
+        $statement->execute();
+        
+        if($statement->rowCount() > 0){
+            $response->success = 1;
+        } else {
+            $response->error = "The rate could not be added.";
+        }
+        
+        // Close the connection
+        $connection = null;
+    } catch(PDOException $e) {
+        error_log($e->getMessage());
+    }
+    break;
+case "deleteRate":
+    authenticateAdmin($request);
+    
+    if(!isset($request->idNum)){
+        die($missingParametersError);
+    }
+    
+    try {
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_DELETE, $PASS_DELETE);
+       
+        $statement = $connection->prepare("DELETE FROM rates WHERE ID = :idNum");
+        $statement->bindValue(':idNum', $request->idNum, PDO::PARAM_INT);
+        $statement->execute();
+        
+        if($statement->rowCount() > 0){
+            $response->success = 1;
+        } else {
+            $response->error = "An rate with that ID does not exist.";
         }
         
         // Close the connection
