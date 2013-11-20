@@ -232,14 +232,9 @@ function changeBookFlight() {
 
 function findFlight() {
     var classInt, typeInt;
-    var table = $('.RatesTable')[0];
     
-	var date = $("#bookDate").val();
-	var numAdults = $("#bookAdults").val();
-	var numChildren = $("#bookChildren").val();
-	var numInfants = $("#bookInfants").val();
-	var destination = $("#bookTo").val();
-	var origin = $("#bookFrom").val();
+	var destination = $("#bookTo").val(),
+        origin = $("#bookFrom").val();
 	
     if($('#bookDomestic')[0].checked){
         typeInt = DomesticInt;
@@ -299,5 +294,53 @@ function findFlight() {
 }
 
 function bookFlight( id ) {
-    alert(id);
+    if(!confirm('Do you want to book this flight?'))
+        return;
+    
+    var date = $("#bookDate").val(),
+        numAdults = $("#bookAdults").val(),
+        numChildren = $("#bookChildren").val(),
+        numInfants = $("#bookInfants").val();
+    
+    $.post( "bookFlight.php", { date: date, adults: numAdults, children: numChildren, infants: numInfants, rateID: id }, function( response ) {
+        try {
+            response = jQuery.parseJSON(response);
+        } catch(e) {
+            response = {};
+        }
+        
+        if(response.error){
+            alert(response.error);
+        } else if(response.BookingID){
+            var flightType = $('[name=type]:checked').val(),
+                flightClass = $('[name=class]:checked').val();
+
+            var TotalPrice = response.rate.Price*numAdults;
+            
+            var source = '<b>From:</b> ' + response.rate.From + '<br><br>' +
+                         '<b>To:</b> ' + response.rate.To + '<br><br>' +
+                         '<b>Type:</b> ' + flightType + '<br><br>' +
+                         '<b>Class:</b> ' + flightClass + '<br><br>' +
+                         '<b>Traveling Date:</b> ' + date + '<br><br>' +
+                         '<b>Totoal Price:</b> ' + TotalPrice + '<br><br>' +
+                         '<b>Departure Time:</b> ' + response.rate.Time + '<br><br>' +
+                         '<b>Adults:</b> ' + numAdults + '<br><br>' +
+                         '<b>Children:</b> ' + numChildren + '<br><br>' +
+                         '<b>Infants:</b> ' + numInfants + '<br><br>' +
+                         '<b>Ticket Number:</b> ' + response.BookingID + '<br><br>' +
+                         '<b>Booked By:</b> ' + Username + '<br><br>';
+            
+            
+            $('#TicketContent').html( source );
+            
+            $('#ticketClose').off('click')
+                             .click( function() { changeView('Dashboard'); } );
+            changeView('TicketSummary');
+        } else {
+            alert(unexpectedError);
+        }
+    })
+    .fail(function(){
+        alert(connectionError);
+    });
 }

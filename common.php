@@ -22,6 +22,8 @@ This function should be called at the beginning of endpoints that require
 a user to be logged in.
 */
 function authenticateUser() {
+    global $PassSaltConstant, $DB_HOST, $DB_NAME, $USER_SELECT, $PASS_SELECT;
+
     if( !isset($_COOKIE["user"]) || !isset($_COOKIE["pass"]) ){
     die('{"error":"Authenitcation Error: You need to login first."}');
     }
