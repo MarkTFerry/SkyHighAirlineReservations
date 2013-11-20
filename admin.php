@@ -34,6 +34,10 @@ function authenticateAdmin($request){
     }
 }
 
+function cleanFilename($name){
+    return preg_replace("^[^-A-Za-z0-9_\s\.]*$","",$name);
+}
+
 if(!isset($_POST["request"])){
     die('{"error":"Request string missing or empty."}');
 }
@@ -153,7 +157,7 @@ case "deleteUser":
 case "addRate":
     authenticateAdmin($request);
     
-    if( !isset($request->type) || !isset($request->classVal) || !isset($request->from)
+    if( !isset($request->airline) || !isset($request->type) || !isset($request->classVal) || !isset($request->from)
         || !isset($request->to)|| !isset($request->price)|| !isset($request->timeVal)){
         die($missingParametersError);
     }
@@ -161,9 +165,10 @@ case "addRate":
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
 
-        //$statement = $connection->prepare("INSERT INTO rates (ID,Type,Class,From,To,Price,Time) VALUES (NULL,:Type,:Class,:From,:To,:Price,:Time)");
-        $statement = $connection->prepare("INSERT INTO rates (`ID`,`Type`,`Class`,`From`,`To`,`Price`,`Time`) 
-                                           VALUES (NULL,:Type,:Class,:From,:To,:Price,:Time)");
+        //$statement = $connection->prepare("INSERT INTO rates (ID,Airline,Type,Class,From,To,Price,Time) VALUES (NULL,:Airline,:Type,:Class,:From,:To,:Price,:Time)");
+        $statement = $connection->prepare("INSERT INTO rates (`ID`,`Airline`,`Type`,`Class`,`From`,`To`,`Price`,`Time`) 
+                                           VALUES (NULL,:Airline,:Type,:Class,:From,:To,:Price,:Time)");
+        $statement->bindValue(":Airline", $request->airline);
         $statement->bindValue(":Type", $request->type, PDO::PARAM_INT);
         $statement->bindValue(":Class", $request->classVal, PDO::PARAM_INT);
         $statement->bindValue(":From", $request->from);
@@ -243,13 +248,15 @@ case "setupServer":
                                           `Children` int(11) NOT NULL,
                                           `Infants` int(11) NOT NULL,
                                           `RateID` int(11) NOT NULL,
+                                          `hasReceipt` tinyint(1) NOT NULL,
                                           PRIMARY KEY (`BookingID`)
                                         ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
         $statement->execute();
         $response->results = $response->results."<br><br>Created table for booked flights";
         
         $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `rates` (
-                                          `ID` int(11) NOT NULL,
+                                          `Airline` varchar(50) NOT NULL,
+                                          `ID` int(11) NOT NULL AUTO_INCREMENT,
                                           `Type` int(11) NOT NULL,
                                           `Class` int(11) NOT NULL,
                                           `From` varchar(50) NOT NULL,

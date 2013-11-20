@@ -139,6 +139,7 @@ function changeUI( action ){
             break;
         case 'addRate':
             $('#formFields').html(
+                         "Airline: <input type='text' id='airline'><br>" +
                          "Type: <select id='type'>" + 
                             "<option value='" + DomesticInt + "'>Domestic</option>" +
                             "<option value='" + InternationalInt + "'>International</option>" +
@@ -170,10 +171,11 @@ function changeUI( action ){
                     if(rates.length < 1){
                         $('#formFields').html('No rates exist.');
                     } else {
-                        var source = "<table class='AdminTable'><tr><td>ID</td><td>Class</td><td>Type</td>"+
-                                     "<td>From</td><td>To</td><td>Price</td><td>Time</td></tr>";
+                        var source = "<table class='AdminTable'><tr><td>ID</td><td>Airline</td><td>Class</td>"+
+                                     "<td>Type</td><td>From</td><td>To</td><td>Price</td><td>Time</td></tr>";
                         for(var i=0; i<rates.length; i++){
-                            source += "<tr><td>" + rates[i].ID + "</td><td>";
+                            source += "<tr><td>" + rates[i].ID + "</td><td>" +
+                                       rates[i].Airline + "</td><td>";
                             if(rates[i].Type == DomesticInt){ source += "Domestic"; }
                             if(rates[i].Type == InternationalInt){ source += "International"; }
                             source += "</td><td>";
@@ -301,6 +303,7 @@ function submitForm(){
             });
             break;
         case 'addRate':
+            request.airline = $('#airline')[0].value;
             request.type = $('#type')[0].value;
             request.classVal = $('#class')[0].value;
             request.from = $('#from')[0].value;
@@ -335,13 +338,14 @@ function submitForm(){
                 importData = jQuery.parseJSON( $('#data')[0].value );
                 if(importData.length < 1){ throw ''; }
             } catch(e) {
-                alert('There are no rates to import. Please make sure you copied all of previously exported data.');
+                alert('There are no rates to import. Please make sure you copied all of the previously exported data.');
                 break;
             }
             
             request.action = 'addRate';
             
             for(var i=0; i<importData.length; i++){
+                request.airline = importData[i].Airline;
                 request.type = importData[i].Type;
                 request.classVal = importData[i].Class;
                 request.from = importData[i].From;
