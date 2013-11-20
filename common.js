@@ -2,7 +2,8 @@ var loggedIn = false,
     Username;
 
 var unexpectedError = "An unexpected error occured. If you keep seeing this message, please reload the page or contact technical support.",
-    connectionError = "Could not connect. Please check your internet connection or try reloading the page.";
+    connectionError = "Could not connect. Please check your internet connection or try reloading the page.",
+    incompleteFormError = "Please fill out the form completely before submitting.";
 
 var DomesticInt = 1,
     InternationalInt = 2,
@@ -42,6 +43,13 @@ function updateDashboard() {
     // Enable/Disable buttons based on login state
     $('.Dashboard > button.LoginRequired').addClass('locked').prop("disabled",true);
     $('.Loggedin > button.LoginRequired').removeClass('locked').prop("disabled",false);
+}
+
+function startup() {
+    updateDashboard();
+    
+    $('#ratesDomestic').click();
+    $('#ratesEconomic').click();
 }
 
 function login() {
@@ -130,17 +138,17 @@ function getRates() {
     var table = $('.RatesTable')[0];
     
     if($('#ratesDomestic')[0].checked){
-        classInt = DomesticInt;
+        typeInt = DomesticInt;
     } else if($('#ratesInternational')[0].checked){
-        classInt = InternationalInt;
+        typeInt = InternationalInt;
     } else {
         return;
     }
     
     if($('#ratesEconomic')[0].checked){
-        typeInt = EconomicInt;
+        classInt = EconomicInt;
     } else if($('#ratesBusiness')[0].checked){
-        typeInt = BusinessInt;
+        classInt = BusinessInt;
     } else {
         return;
     }
@@ -179,6 +187,49 @@ function getRates() {
 
 }
 
+function changeBookFlight() {
+    var fromArray = [], toArray = [];
+    $.get( "getRates.php", { all: 1 } )
+        .done(function( response ) {
+            try {
+                response = jQuery.parseJSON(response);
+            } catch(e) {
+                alert(unexpectedError);
+                return;
+            }
+            
+            if(response.error){
+                alert(response.error);
+            } else {
+                var fromOptions = $('#bookFrom')[0].options,
+                    toOptions = $('#bookTo')[0].options;
+                
+                while(fromOptions.length > 0)
+                    fromOptions.remove(0);
+                
+                while(toOptions.length > 0)
+                    toOptions.remove(0);
+            
+                for(i=0; i<response.length; i++){
+                    if(fromArray.indexOf(response[i]['From']) < 0){
+                        fromArray.push(response[i]['From']);
+                        fromOptions.add( new Option(response[i]['From'],response[i]['From']) );
+                    }
+                    
+                    if(toArray.indexOf(response[i]['To']) < 0){
+                        toArray.push(response[i]['To']);
+                        toOptions.add( new Option(response[i]['To'],response[i]['To']) );
+                    }
+                }
+                
+                changeView('BookFlight');
+            }
+        })
+        .fail(function(){
+            alert(connectionError);
+        });
+}
+
 function findFlight() {
     var classInt, typeInt;
     var table = $('.RatesTable')[0];
@@ -191,20 +242,62 @@ function findFlight() {
 	var origin = $("#bookFrom").val();
 	
     if($('#bookDomestic')[0].checked){
-        classInt = DomesticInt;
+        typeInt = DomesticInt;
     } else if($('#bookInternational')[0].checked){
-        classInt = InternationalInt;
+        typeInt = InternationalInt;
     } else {
+        alert(incompleteFormError);
         return;
     }
     
     if($('#bookEconomic')[0].checked){
-        typeInt = EconomicInt;
+        classInt = EconomicInt;
     } else if($('#bookBusiness')[0].checked){
-        typeInt = BusinessInt;
+        classInt = BusinessInt;
     } else {
+        alert(incompleteFormError);
         return;
     }
 	
-	
+	$.get( "getRates.php", { class: classInt, type: typeInt } )
+        .done(function( response ) {
+            try {
+                response = jQuery.parseJSON(response);
+            } catch(e) {
+                alert(unexpectedError);
+                return;
+            }
+            
+            if(response.error){
+                alert(response.error);
+            } else {
+                var resultArray = [];
+                for(i=0; i<response.length; i++){
+                    if( (response[i]['From'] == origin) && (response[i]['To'] == destination) )
+                        resultArray.push( response[i] );
+                }
+                
+                if(resultArray.length < 1){
+                    alert('No flights found.');
+                    return;
+                }
+                
+                var source = '<h3>' + resultArray.length + ' flight(s) found:</h3>';
+                for(i=0; i<resultArray.length; i++){
+                    source += '<a href="javascript:bookFlight(' + resultArray[i].ID;
+                    source += ')">From ' + resultArray[i].From + ' to ' + resultArray[i].To;
+                    source += ' at ' + resultArray[i].Time + ' for $' + resultArray[i].Price;
+                    source += '</a><br><br>';
+                }
+                $('#flightList').html( source );
+                changeView('FlightList');
+            }
+        })
+        .fail(function(){
+            alert(connectionError);
+        });
+}
+
+function bookFlight( id ) {
+    alert(id);
 }

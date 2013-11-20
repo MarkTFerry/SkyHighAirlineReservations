@@ -10,7 +10,7 @@
 </head>
 
 
-<body onLoad="updateDashboard()">
+<body onLoad="startup()">
 
 <div class="View Dashboard Active">
     <div class="LoginHeader">
@@ -24,7 +24,7 @@
     <h1>Sky High Airline Reservations</h1>
     <br>
     <button onclick="changeView('CheckRates')">Check Rates</button><br>
-    <button class="LoginRequired" onclick="changeView('BookFlight')">Book A Flight</button><br>
+    <button class="LoginRequired" onclick="changeBookFlight()">Book A Flight</button><br>
     <button class="LoginRequired" onclick="changeView('ViewBookedFlights')">View Booked Flights</button>
 
 </div>
@@ -72,7 +72,6 @@
 <div class="View BookFlight">
     <button class="close" onclick="changeView('Dashboard')">X</button>
     <h1>Book A Flight</h1>
-    <form name="BookFlightForm">
     <table><tr>
     <td>
         <h2>Booking Details</h2>
@@ -114,6 +113,11 @@
     </form>
 </div>
 
+<div class="View FlightList">
+    <div id="flightList"></div>
+    <button onClick="changeView('BookFlight')">Cancel</button>
+</div>
+
 <div class="View TicketSummary">
     <button class="close" onclick="changeView('Dashboard')">X</button>
     <h1>Ticket Summary</h1>
@@ -136,6 +140,7 @@
             <td><b>Children</b></td>
             <td><b>Infants</b></td>
             <td><b>Ticket Number</b></td>
+            <td></td>
             <td></td>
             <td></td>
         </tr>
