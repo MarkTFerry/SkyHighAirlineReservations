@@ -165,7 +165,6 @@ case "addRate":
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
 
-        //$statement = $connection->prepare("INSERT INTO rates (ID,Airline,Type,Class,From,To,Price,Time) VALUES (NULL,:Airline,:Type,:Class,:From,:To,:Price,:Time)");
         $statement = $connection->prepare("INSERT INTO rates (`ID`,`Airline`,`Type`,`Class`,`From`,`To`,`Price`,`Time`) 
                                            VALUES (NULL,:Airline,:Type,:Class,:From,:To,:Price,:Time)");
         $statement->bindValue(":Airline", $request->airline);
@@ -241,7 +240,7 @@ case "setupServer":
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $request->adminUser, $request->adminPass);
 
         $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `bookedflights` (
-                                          `BookingID` int(11) NOT NULL,
+                                          `BookingID` int(11) NOT NULL AUTO_INCREMENT,
                                           `Username` varchar(100) NOT NULL,
                                           `Date` varchar(10) NOT NULL,
                                           `Adults` int(11) NOT NULL,
@@ -255,8 +254,8 @@ case "setupServer":
         $response->results = $response->results."<br><br>Created table for booked flights";
         
         $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `rates` (
-                                          `Airline` varchar(50) NOT NULL,
                                           `ID` int(11) NOT NULL AUTO_INCREMENT,
+                                          `Airline` varchar(50) NOT NULL,
                                           `Type` int(11) NOT NULL,
                                           `Class` int(11) NOT NULL,
                                           `From` varchar(50) NOT NULL,
