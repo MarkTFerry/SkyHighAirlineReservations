@@ -76,16 +76,16 @@
     <table><tr>
     <td>
         <h2>Booking Details</h2>
-        From: <select name="from"></select><br>
-        To: <select name="to"></select><br>
-        Booking Date: <input type="text" name="date" value="DD/MM/YYYY" size="10"><br>
-        Class:  <input type="radio" name="type" value="Domestic" checked>Domestic</input>
-                <input type="radio" name="type" value="International" checked>International</input><br>
-        Type:   <input type="radio" name="class" value="Economic" checked>Economic</input>
-                <input type="radio" name="class" value="Business" checked>Business</input>
+        From: <select name="from" id = "bookFrom"></select><br>
+        To: <select name="to" id = "bookTo"></select><br>
+        Booking Date: <input type="text" name="date" id ="bookDate" value="DD/MM/YYYY" size="10"><br>
+        Class:  <input type="radio" name="type" id ="bookDomestic" value="Domestic" checked>Domestic</input>
+                <input type="radio" name="type" id="bookInternational" value="International" checked>International</input><br>
+        Type:   <input type="radio" name="class" id ="bookEconomic" value="Economic" checked>Economic</input>
+                <input type="radio" name="class" id ="bookBusiness" value="Business" checked>Business</input>
     </td><td>
         <h2>Passenger Details</h2>
-        Adults (12+): <select name="adults">
+        Adults (12+): <select name="adults" id="bookAdults">
                       <option value="1">1</option>
                       <option value="2">2</option>
                       <option value="3">3</option>
@@ -93,14 +93,14 @@
                       <option value="5">5</option>
                       <option value="6">6</option>
                       </select><br>
-        Children (2-11): <select name="children">
+        Children (2-11): <select name="children" id="bookChildren">
                          <option value="0">0</option>
                          <option value="1">1</option>
                          <option value="2">2</option>
                          <option value="3">3</option>
                          <option value="4">4</option>
                          </select><br>
-        Infants (under 2): <select name="infants">
+        Infants (under 2): <select name="infants" id="bookInfants">
                            <option value="0">0</option>
                            <option value="1">1</option>
                            <option value="2">2</option>
@@ -109,7 +109,7 @@
     </td>
     </tr></table>
     
-    <button onclick="return false;">Find Flight</button>
+    <button onclick="findFlight()">Find Flight</button>
     
     </form>
 </div>
