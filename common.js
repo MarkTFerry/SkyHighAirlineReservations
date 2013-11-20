@@ -178,3 +178,33 @@ function getRates() {
         });
 
 }
+
+function findFlight() {
+    var classInt, typeInt;
+    var table = $('.RatesTable')[0];
+    
+	var date = $("#bookDate").val();
+	var numAdults = $("#bookAdults").val();
+	var numChildren = $("#bookChildren").val();
+	var numInfants = $("#bookInfants").val();
+	var destination = $("#bookTo").val();
+	var origin = $("#bookFrom").val();
+	
+    if($('#bookDomestic')[0].checked){
+        classInt = DomesticInt;
+    } else if($('#bookInternational')[0].checked){
+        classInt = InternationalInt;
+    } else {
+        return;
+    }
+    
+    if($('#bookEconomic')[0].checked){
+        typeInt = EconomicInt;
+    } else if($('#bookBusiness')[0].checked){
+        typeInt = BusinessInt;
+    } else {
+        return;
+    }
+	
+	
+}
