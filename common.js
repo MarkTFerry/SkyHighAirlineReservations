@@ -386,6 +386,13 @@ function changeViewBookedFlights() {
                                 table.deleteRow(1);
                             }
                             
+                            if(response.length < 1){
+                                table.insertRow(1);
+                                table.rows[1].insertCell(0);
+                                table.rows[1].cells[0].colSpan = 14;
+                                table.rows[1].cells[0].innerHTML = '<center>You have no booked flights.</center>';
+                            }
+                            
                             // Add a row to the table for each object in the response
                             for(i=0; i<response.length; i++){
 
@@ -411,6 +418,8 @@ function changeViewBookedFlights() {
                                                                       JSON.stringify( response[i] ).replace(/"/g, '&quot;') +
                                                                       '\',\'' + JSON.stringify( rateCache[ID] ).replace(/"/g, '&quot;') +
                                                                       '\')">View Ticket</a>';
+                                table.rows[i+1].cells[12].innerHTML = '<a href="Javascript:cancelFlight(' + response[i]["BookingID"] +
+                                                                      ')">Cancel Flight</a>';
                             }
                             
                             changeView('ViewBookedFlights');
@@ -459,3 +468,32 @@ function viewTicket( booking, rate ){
             changeView('TicketSummary');
 }
 
+function cancelFlight( id ){
+    if(!confirm('Are you sure you want to cancel this booking?'))
+        return;
+    
+    $.post( "cancelFlight.php", { ID: id }, function( response ) {
+        try {
+            response = jQuery.parseJSON(response);
+        } catch(e) {
+            response = {};
+        }
+        
+        if(response.error){
+            alert(response.error);
+        } else if(response.success){
+            // Hide the booked flights view so we don't see the table before its finished rendering
+            $.when(
+                $('.View.Active').fadeOut()
+                         .removeClass('Active')
+            ).then( function() {
+                changeViewBookedFlights();
+            });
+        } else {
+            alert(unexpectedError);
+        }
+    })
+    .fail(function(){
+        alert(connectionError);
+    });
+}
