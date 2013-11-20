@@ -344,3 +344,80 @@ function bookFlight( id ) {
         alert(connectionError);
     });
 }
+
+function changeViewBookedFlights() {
+    
+    var table = $('.BookedFlightsTable')[0];
+    
+    $.get( "getRates.php", { all: 1 } )
+        .done(function( response ) {
+            try {
+                response = jQuery.parseJSON(response);
+            } catch(e) {
+                alert(unexpectedError);
+                return;
+            }
+            
+            if(response.error){
+                alert(response.error);
+            } else {
+                
+                var rateCache = {};
+                
+                // Store rate objects indexed by ID so they can be looked up quickly
+                for(i in response){
+                    rateCache[ response[i]['ID'] ] = response[i];
+                }
+                
+                $.get( "getBookedFlights.php", { } )
+                    .done(function( response ) {
+                        try {
+                            response = jQuery.parseJSON(response);
+                        } catch(e) {
+                            alert(unexpectedError);
+                            return;
+                        }
+                        
+                        if(response.error){
+                            alert(response.error);
+                        } else {
+                            // Clear the table
+                            while(table.rows.length > 1){
+                                table.deleteRow(1);
+                            }
+                            
+                            // Add a row to the table for each object in the response
+                            for(i=0; i<response.length; i++){
+                                                                
+                                var ID = response[i]['RateID'],
+                                    TotalPrice = rateCache[ID]["Price"]*response[i]["Adults"];
+                                
+                                table.insertRow(i+1);
+                                for(j=0; j<14; j++) { table.rows[i+1].insertCell(j); }
+                                table.rows[i+1].cells[0].innerHTML = rateCache[ID]["From"];
+                                table.rows[i+1].cells[1].innerHTML = rateCache[ID]["To"];
+                                if(rateCache[ID]["Class"] == EconomicInt){ table.rows[i+1].cells[2].innerHTML = 'Economic'; }
+                                if(rateCache[ID]["Class"] == BusinessInt){ table.rows[i+1].cells[2].innerHTML = 'Business'; }
+                                if(rateCache[ID]["Type"] == DomesticInt){ table.rows[i+1].cells[3].innerHTML = 'Domestic'; }
+                                if(rateCache[ID]["Type"] == InternationalInt){ table.rows[i].cells[3].innerHTML = 'International'; }
+                                table.rows[i+1].cells[4].innerHTML = response[i]["Date"];
+                                table.rows[i+1].cells[5].innerHTML = rateCache[ID]["Time"];
+                                table.rows[i+1].cells[6].innerHTML = TotalPrice;
+                                table.rows[i+1].cells[7].innerHTML = response[i]["Adults"];
+                                table.rows[i+1].cells[8].innerHTML = response[i]["Children"];
+                                table.rows[i+1].cells[9].innerHTML = response[i]["Infants"];
+                                table.rows[i+1].cells[10].innerHTML = response[i]["BookingID"];
+                            }
+                            
+                            changeView('ViewBookedFlights');
+                        }
+                    })
+                    .fail(function(){
+                        alert(connectionError);
+                    });
+            }
+        })
+        .fail(function(){
+            alert(connectionError);
+        });
+}
