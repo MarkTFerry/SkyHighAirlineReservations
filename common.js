@@ -388,7 +388,7 @@ function changeViewBookedFlights() {
                             
                             // Add a row to the table for each object in the response
                             for(i=0; i<response.length; i++){
-                                                                
+
                                 var ID = response[i]['RateID'],
                                     TotalPrice = rateCache[ID]["Price"]*response[i]["Adults"];
                                 
@@ -407,6 +407,10 @@ function changeViewBookedFlights() {
                                 table.rows[i+1].cells[8].innerHTML = response[i]["Children"];
                                 table.rows[i+1].cells[9].innerHTML = response[i]["Infants"];
                                 table.rows[i+1].cells[10].innerHTML = response[i]["BookingID"];
+                                table.rows[i+1].cells[11].innerHTML = '<a href="Javascript:viewTicket(\'' + 
+                                                                      JSON.stringify( response[i] ).replace(/"/g, '&quot;') +
+                                                                      '\',\'' + JSON.stringify( rateCache[ID] ).replace(/"/g, '&quot;') +
+                                                                      '\')">View Ticket</a>';
                             }
                             
                             changeView('ViewBookedFlights');
@@ -421,3 +425,37 @@ function changeViewBookedFlights() {
             alert(connectionError);
         });
 }
+
+function viewTicket( booking, rate ){
+    bookingObj = jQuery.parseJSON(booking);
+    rateObj = jQuery.parseJSON(rate);
+    
+    var flightType = '', flightClass = '',
+        TotalPrice = rateObj.Price*bookingObj.Adults;
+        
+    if(rateObj.Class == EconomicInt){ flightClass = 'Economic'; }
+    if(rateObj.Class == BusinessInt){ flightClass = 'Business'; }
+    if(rateObj.Type == DomesticInt){ flightType = 'Domestic'; }
+    if(rateObj.Type == InternationalInt){ flightType = 'International'; }
+    
+    var source = '<b>From:</b> ' + rateObj.From + '<br><br>' +
+                         '<b>To:</b> ' + rateObj.To + '<br><br>' +
+                         '<b>Type:</b> ' + flightType + '<br><br>' +
+                         '<b>Class:</b> ' + flightClass + '<br><br>' +
+                         '<b>Traveling Date:</b> ' + bookingObj.Date + '<br><br>' +
+                         '<b>Totoal Price:</b> ' + TotalPrice + '<br><br>' +
+                         '<b>Departure Time:</b> ' + rateObj.Time + '<br><br>' +
+                         '<b>Adults:</b> ' + bookingObj.Adults + '<br><br>' +
+                         '<b>Children:</b> ' + bookingObj.Children + '<br><br>' +
+                         '<b>Infants:</b> ' + bookingObj.Infants + '<br><br>' +
+                         '<b>Ticket Number:</b> ' + bookingObj.BookingID + '<br><br>' +
+                         '<b>Booked By:</b> ' + bookingObj.Username + '<br><br>';
+            
+            
+            $('#TicketContent').html( source );
+            
+            $('#ticketClose').off('click')
+                             .click( function() { changeView('ViewBookedFlights'); } );
+            changeView('TicketSummary');
+}
+
