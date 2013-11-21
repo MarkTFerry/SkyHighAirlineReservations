@@ -128,3 +128,9 @@ td {
     border:1px solid #000000;
     padding:10px;
 }
+
+.logoIMG {
+    width:30%;
+    height:30%;
+    margin-bottom:50px;
+}

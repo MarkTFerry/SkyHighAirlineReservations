@@ -317,7 +317,9 @@ function bookFlight( id ) {
 
             var TotalPrice = response.rate.Price*numAdults;
             
-            var source = '<b>From:</b> ' + response.rate.From + '<br><br>' +
+            var source = '<img class="logoIMG" src="./resources/logos/' + response.rate.Airline + 
+                         '.png" onerror="this.remove()" /><br>' +
+                         '<b>From:</b> ' + response.rate.From + '<br><br>' +
                          '<b>To:</b> ' + response.rate.To + '<br><br>' +
                          '<b>Type:</b> ' + flightType + '<br><br>' +
                          '<b>Class:</b> ' + flightClass + '<br><br>' +
@@ -420,7 +422,7 @@ function changeViewBookedFlights() {
                                                                       '\')">View Ticket</a>';
                                 table.rows[i+1].cells[12].innerHTML = '<a href="Javascript:cancelFlight(' + response[i]["BookingID"] +
                                                                       ')">Cancel Flight</a>';
-                                if(response[i]["hasReceipt"]){
+                                if(response[i]["hasReceipt"] == 1){
                                 table.rows[i+1].cells[13].innerHTML = '<a href="Javascript:viewReceipt(' + response[i]["BookingID"] +
                                                                       ')">View Receipt</a>';
                                 }
@@ -451,18 +453,20 @@ function viewTicket( booking, rate ){
     if(rateObj.Type == DomesticInt){ flightType = 'Domestic'; }
     if(rateObj.Type == InternationalInt){ flightType = 'International'; }
     
-    var source = '<b>From:</b> ' + rateObj.From + '<br><br>' +
-                         '<b>To:</b> ' + rateObj.To + '<br><br>' +
-                         '<b>Type:</b> ' + flightType + '<br><br>' +
-                         '<b>Class:</b> ' + flightClass + '<br><br>' +
-                         '<b>Traveling Date:</b> ' + bookingObj.Date + '<br><br>' +
-                         '<b>Totoal Price:</b> ' + TotalPrice + '<br><br>' +
-                         '<b>Departure Time:</b> ' + rateObj.Time + '<br><br>' +
-                         '<b>Adults:</b> ' + bookingObj.Adults + '<br><br>' +
-                         '<b>Children:</b> ' + bookingObj.Children + '<br><br>' +
-                         '<b>Infants:</b> ' + bookingObj.Infants + '<br><br>' +
-                         '<b>Ticket Number:</b> ' + bookingObj.BookingID + '<br><br>' +
-                         '<b>Booked By:</b> ' + bookingObj.Username + '<br><br>';
+    var source = '<img class="logoIMG" src="./resources/logos/' + rateObj.Airline + 
+                 '.png" onerror="this.remove()" /><br>' +
+                 '<b>From:</b> ' + rateObj.From + '<br><br>' +
+                 '<b>To:</b> ' + rateObj.To + '<br><br>' +
+                 '<b>Type:</b> ' + flightType + '<br><br>' +
+                 '<b>Class:</b> ' + flightClass + '<br><br>' +
+                 '<b>Traveling Date:</b> ' + bookingObj.Date + '<br><br>' +
+                 '<b>Totoal Price:</b> ' + TotalPrice + '<br><br>' +
+                 '<b>Departure Time:</b> ' + rateObj.Time + '<br><br>' +
+                 '<b>Adults:</b> ' + bookingObj.Adults + '<br><br>' +
+                 '<b>Children:</b> ' + bookingObj.Children + '<br><br>' +
+                 '<b>Infants:</b> ' + bookingObj.Infants + '<br><br>' +
+                 '<b>Ticket Number:</b> ' + bookingObj.BookingID + '<br><br>' +
+                 '<b>Booked By:</b> ' + bookingObj.Username + '<br><br>';
             
             
             $('#TicketContent').html( source );
