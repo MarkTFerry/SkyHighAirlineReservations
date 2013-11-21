@@ -4,8 +4,21 @@
 <title>Sky High Airline Reservations</title>
 
 <link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" type="text/css" href="datepicker.css">
 <script src="jquery-1.10.2.min.js"></script>
+<script src="jquery-ui.min.js"></script>
 <script src="common.js"></script>
+
+<script type="text/javascript">
+    $(function() {
+        var options = {
+            changeYear: true,
+            yearRange: "0:+2",
+            minDate: 0
+        }
+        $(".getDate").datepicker(options);
+    });
+</script>
 
 </head>
 
@@ -77,7 +90,7 @@
         <h2>Booking Details</h2>
         From: <select name="from" id = "bookFrom"></select><br>
         To: <select name="to" id = "bookTo"></select><br>
-        Booking Date: <input type="text" name="date" id ="bookDate" value="DD/MM/YYYY" size="10"><br>
+        Booking Date: <input type="text" class="getDate" name="date" id ="bookDate" placeholder="DD/MM/YYYY" size="10"><br>
         Class:  <input type="radio" name="type" id ="bookDomestic" value="Domestic" checked>Domestic</input>
                 <input type="radio" name="type" id="bookInternational" value="International" checked>International</input><br>
         Type:   <input type="radio" name="class" id ="bookEconomic" value="Economic" checked>Economic</input>
