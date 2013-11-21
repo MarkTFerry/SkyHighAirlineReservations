@@ -420,6 +420,10 @@ function changeViewBookedFlights() {
                                                                       '\')">View Ticket</a>';
                                 table.rows[i+1].cells[12].innerHTML = '<a href="Javascript:cancelFlight(' + response[i]["BookingID"] +
                                                                       ')">Cancel Flight</a>';
+                                if(response[i]["hasReceipt"]){
+                                table.rows[i+1].cells[13].innerHTML = '<a href="Javascript:viewReceipt(' + response[i]["BookingID"] +
+                                                                      ')">View Receipt</a>';
+                                }
                             }
                             
                             changeView('ViewBookedFlights');
@@ -489,6 +493,29 @@ function cancelFlight( id ){
             ).then( function() {
                 changeViewBookedFlights();
             });
+        } else {
+            alert(unexpectedError);
+        }
+    })
+    .fail(function(){
+        alert(connectionError);
+    });
+}
+
+function viewReceipt( id ){
+    $.post( "getReceipt.php", { ID: id }, function( response ) {
+        try {
+            response = jQuery.parseJSON(response);
+        } catch(e) {
+            response = {};
+        }
+        
+        if(response.error){
+            alert(response.error);
+        } else if(response.GUID){
+            var pdfURL = window.location.pathname + 'resources/receiptCache/' + escape(response.GUID) + '.pdf',
+                viewerURL = './Viewer.js/#' + pdfURL;
+            window.open(viewerURL);
         } else {
             alert(unexpectedError);
         }
