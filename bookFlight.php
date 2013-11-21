@@ -11,7 +11,7 @@ The endpoint always returns the rateObject if the rateID is valid.
 include 'common.php';
 authenticateUser();
 
-function validateDate($date, $format = 'd/m/Y')
+function validateDate($date, $format = 'm/d/Y')
 {
     $d = DateTime::createFromFormat($format, $date);
     return $d && $d->format($format) == $date;

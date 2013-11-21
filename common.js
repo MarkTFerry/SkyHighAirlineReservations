@@ -50,6 +50,15 @@ function startup() {
     
     $('#ratesDomestic').click();
     $('#ratesEconomic').click();
+    
+    $(function() {
+        var options = {
+            changeYear: true,
+            yearRange: "0:+2",
+            minDate: 0
+        }
+        $(".getDate").datepicker(options);
+    });
 }
 
 function login() {
