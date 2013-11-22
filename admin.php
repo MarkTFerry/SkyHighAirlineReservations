@@ -98,6 +98,7 @@ case "addUser":
 case "viewAdmin":
 case "viewUser":
 case "viewRate":
+case "viewBooking":
     authenticateAdmin($request);
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
@@ -106,8 +107,10 @@ case "viewRate":
             $statement = $connection->prepare("SELECT * FROM admins");
         } else if($request->action == "viewUser"){
             $statement = $connection->prepare("SELECT * FROM users");
-        } else {
+        } else if($request->action == "viewRate"){
             $statement = $connection->prepare("SELECT * FROM rates");
+        } else {
+            $statement = $connection->prepare("SELECT * FROM bookedflights");
         }
         
         $statement->execute();
@@ -189,6 +192,7 @@ case "addRate":
     }
     break;
 case "deleteRate":
+case "deleteBooking":
     authenticateAdmin($request);
     
     if(!isset($request->idNum)){
@@ -198,14 +202,22 @@ case "deleteRate":
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_DELETE, $PASS_DELETE);
        
-        $statement = $connection->prepare("DELETE FROM rates WHERE ID = :idNum");
+        if($request->action == "deleteRate"){
+            $statement = $connection->prepare("DELETE FROM rates WHERE ID = :idNum");
+        } else {
+            $statement = $connection->prepare("DELETE FROM bookedflights WHERE BookingID = :idNum");
+        }
         $statement->bindValue(':idNum', $request->idNum, PDO::PARAM_INT);
         $statement->execute();
         
         if($statement->rowCount() > 0){
             $response->success = 1;
         } else {
-            $response->error = "An rate with that ID does not exist.";
+            if($request->action == "deleteRate"){
+                $response->error = "A rate with that ID does not exist.";
+            } else {
+                $response->error = "A booking with that ID does not exist.";
+            }
         }
         
         // Close the connection

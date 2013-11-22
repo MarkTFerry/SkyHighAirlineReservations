@@ -275,6 +275,54 @@ function changeUI( action ){
             });
             
             break;
+        case 'viewBooking':
+            var request = JSON.stringify({ adminUser: adminUser, adminPass: adminPass, action: action });
+            $.post( "admin.php", { request: request }, function( response ) {
+                try {
+                    response = jQuery.parseJSON(response);
+                } catch(e) {
+                    response = {};
+                    return;
+                }
+
+                if(response.error){
+                    alert(response.error);
+                } else if(response.result){
+                    var bookings = jQuery.parseJSON(response.result);
+                    if(bookings.length < 1){
+                        $('#formFields').html('No flight have been booked.');
+                    } else {
+                        var source = "<table class='AdminTable'><tr><td>BookingID</td><td>Username</td><td>Date</td>"+
+                                     "<td>Adults</td><td>Children</td><td>Infants</td><td>RateID</td><td>Receipt</td></tr>";
+                        for(var i=0; i<bookings.length; i++){
+                            source += "<tr><td>" + bookings[i].BookingID + "</td>" + 
+                                      "<td>" + bookings[i].Username + "</td>" + 
+                                      "<td>" + bookings[i].Date + "</td>" + 
+                                      "<td>" + bookings[i].Adults + "</td>" + 
+                                      "<td>" + bookings[i].Children + "</td>" + 
+                                      "<td>" + bookings[i].Infants + "</td>" + 
+                                      "<td>" + bookings[i].RateID + "</td>";
+
+                            if(bookings[i].hasReceipt == 0){
+                                source += "<td>No</td>";
+                            } else {
+                                source += "<td>Yes</td>";
+                            }
+                            
+                            source += "</tr>";
+                        }
+                        source += "</table><br><br>ID of booking to delete: " +
+                                  "<input type='text' id='idNum'>";
+                        $('#formFields').html(source);
+                    }
+                } else {
+                    alert(unexpectedError);
+                }
+            })
+            .fail(function(){
+                alert(connectionError);
+            });
+            break;
     }
 }
 
@@ -345,7 +393,13 @@ function submitForm(){
             });
             break;
         case 'viewRate':
-            request.action = 'deleteRate';
+        case 'viewBooking':
+            if(selectedAction == 'viewRate'){
+                request.action = 'deleteRate';
+            } else {
+                request.action = 'deleteBooking';
+            }
+            
             request.idNum = $('#idNum')[0].value;
             request = JSON.stringify( request );
             $.post( "admin.php", { request: request }, function( response ) {
@@ -358,7 +412,11 @@ function submitForm(){
                 if(response.error){
                     alert(response.error);
                 } else if(response.success){
-                    alert('Rate deleted successfully.');
+                    if(selectedAction == 'viewRate'){
+                        alert('Rate deleted successfully.');
+                    } else {
+                        alert('Booking canceled successfully.');
+                    }
                     changeUI(selectedAction);
                 } else {
                     alert(unexpectedError);
