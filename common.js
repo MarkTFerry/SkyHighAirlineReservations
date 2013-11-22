@@ -9,6 +9,12 @@ var DomesticInt = 1,
     InternationalInt = 2,
     EconomicInt = 1,
     BusinessInt = 2;
+
+function getCookie( name ) {
+    if(document.cookie.indexOf(name+'=') == -1)
+        return null;
+    return document.cookie.split(name+'=')[1].split(";")[0]
+}
     
 /*
 Description: Changes the current view
@@ -46,6 +52,11 @@ function updateDashboard() {
 }
 
 function startup() {
+    if( getCookie('user') && getCookie('pass') ){
+        Username = getCookie('user')
+        loggedIn = true;
+    }
+    
     updateDashboard();
     
     $('#ratesDomestic').click();
