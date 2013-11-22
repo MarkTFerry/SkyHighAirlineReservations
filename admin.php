@@ -628,6 +628,7 @@ case "setupServer":
         $statement->execute();
         $response->results = $response->results."<br><br>Added default admin account to admins";
         
+        /*
         $statement = $connection->prepare("GRANT SELECT ON *.* TO '".$USER_SELECT."'@'localhost' IDENTIFIED BY '".$PASS_SELECT."';");
         $statement->execute();
         $response->results = $response->results."<br><br>Added user for SELECT";
@@ -639,6 +640,7 @@ case "setupServer":
         $statement = $connection->prepare("GRANT SELECT, DELETE ON *.* TO '".$USER_DELETE."'@'localhost' IDENTIFIED BY '".$PASS_DELETE."';");
         $statement->execute();
         $response->results = $response->results."<br><br>Added user for DELETE";
+        */
         
         $connection = null;
     } catch(PDOException $e) {
