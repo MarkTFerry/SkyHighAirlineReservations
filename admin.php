@@ -35,7 +35,7 @@ function authenticateAdmin($request){
 }
 
 function cleanFilename($name){
-    return preg_replace("^[^-A-Za-z0-9_\s\.]*$","",$name);
+    return preg_replace('/[^A-Za-z0-9 _ .-]/', '', $name);
 }
 
 if(!isset($_POST["request"])){
@@ -213,6 +213,54 @@ case "deleteRate":
     } catch(PDOException $e) {
         error_log($e->getMessage());
     }
+    break;
+case "addLogo":
+    authenticateAdmin($request);
+    
+    if(!isset($request->airline) || !isset($request->imageData)){
+        die($missingParametersError);
+    }
+    
+    $path = dirname(__FILE__).'/resources/logos/';
+    $filename = cleanFilename( $request->airline.'.png' );
+        
+    // Remove header from data URI
+    $imgData = substr( $request->imageData, strpos($request->imageData,",")+1);
+    $imgResource = imagecreatefromstring( base64_decode($imgData) );
+    
+    if($imgResource === false){
+        $response->error = 'Could not process image. Please try again or upload a different file.';
+    } else if(is_file( $path.$filename )){
+        $response->error = 'A logo for that airline already exists. Please delete the old logo first.';
+    } else {
+        imagepng($imgResource, $path.$filename);
+        $response->success = 1;
+    }
+    break;
+case "viewLogo":
+    authenticateAdmin($request);
+    
+    $path = dirname(__FILE__).'/resources/logos/';
+    $response->result = scandir($path);
+    
+    break;
+case "deleteLogo":
+    authenticateAdmin($request);
+    
+    if(!isset($request->airline)){
+        die($missingParametersError);
+    }
+    
+    $path = dirname(__FILE__).'/resources/logos/';
+    $filename = cleanFilename( $request->airline.'.png' );
+    
+    if(is_file($path.$filename)){
+        unlink($path.$filename);
+        $response->success = 1;
+    } else {
+        $response->error = 'The logo could not be deleted.';
+    }
+    
     break;
 case "setupServer":
     $connection = mysql_connect($DB_HOST, $request->adminUser, $request->adminPass);

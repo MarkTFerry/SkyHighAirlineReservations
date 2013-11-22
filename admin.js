@@ -209,6 +209,55 @@ function changeUI( action ){
                 "You can paste the exported rates into a text file or send them via email."
                 );
             break;
+        case 'addLogo':
+            $('#formFields').html(
+                "Airline: <input type='text' id='airline'><br><br>" +
+                "Image: <input type='file' id='image'>"
+                );
+            break;
+        case 'viewLogo':
+            var request = JSON.stringify({ adminUser: adminUser, adminPass: adminPass, action: action });
+            $.post( "admin.php", { request: request }, function( response ) {
+                try {
+                    response = jQuery.parseJSON(response);
+                } catch(e) {
+                    response = {};
+                }
+                
+                if(response.error){
+                    alert(response.error);
+                } else if(response.result){
+                    
+                    var logos = response.result,
+                        path = './resources/logos/';
+                    
+                    if(logos.length < 1){
+                        $('#formFields').html('No logos have been uploaded.');
+                    } else {
+                        var source = "<table class='AdminTable'><tr><td>Airline</td><td>Thumbnail</td></tr>";
+                        for(var i=0; i<logos.length; i++){
+                            if( (logos[i] == '.') || (logos[i] == '..') ){
+                                continue;
+                            }
+                            var imgFile = path + logos[i],
+                                airline = logos[i].substring( 0, logos[i].length-4 );
+                            
+                            source += "<tr><td>" + airline + "</td>" +
+                                      "<td><a href='javascript:window.open(\"" + imgFile + "\")'>" +
+                                      "<img src='" + imgFile + "' class='logoThumb'></a></td></tr>";
+                        }
+                        source += "</table><br><br>Name of airline to delete: " +
+                                  "<input type='text' id='airline'>";
+                        $('#formFields').html(source);
+                    }
+                } else {
+                    alert(unexpectedError);
+                }
+            })
+            .fail(function(){
+                alert(connectionError);
+            });
+            break;
     }
 }
 
@@ -413,5 +462,62 @@ function submitForm(){
             .fail(function(){
                 alert(connectionError);
             });
+            break;
+        case 'addLogo':
+            var reader = new FileReader();
+            reader.onload = function(e){
+                var airline = $('#airline').val(),
+                    imageData = event.target.result;
+                
+                request.airline = airline;
+                request.imageData = imageData;
+                request = JSON.stringify( request );
+                
+                $.post( "admin.php", { request: request }, function( response ) {
+                    try {
+                        response = jQuery.parseJSON(response);
+                    } catch(e) {
+                        response = {};
+                    }
+                    
+                    if(response.error){
+                        alert(response.error);
+                    } else if(response.success){
+                        alert('Logo uploaded successfully.');
+                    } else {
+                        alert(unexpectedError);
+                    }
+                })
+                .fail(function(){
+                    alert(connectionError);
+                });
+            }
+            reader.readAsDataURL( document.getElementById('image').files[0] );
+
+            break;
+        case 'viewLogo':
+            request.action = 'deleteLogo';
+            request.airline = $('#airline').val();
+            request = JSON.stringify( request );
+            $.post( "admin.php", { request: request }, function( response ) {
+                try {
+                    response = jQuery.parseJSON(response);
+                } catch(e) {
+                    response = {};
+                }
+
+                if(response.error){
+                    alert(response.error);
+                } else if(response.success){
+                    alert('Logo deleted successfully.');
+                    changeUI(selectedAction);
+                } else {
+                    alert(unexpectedError);
+                }
+            })
+            .fail(function(){
+                alert(connectionError);
+            });
+            break;
     }
 }
