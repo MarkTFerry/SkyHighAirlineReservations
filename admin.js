@@ -329,6 +329,44 @@ function changeUI( action ){
                 "Receipt PDF: <input type='file' id='pdf'>"
                 );
             break;
+        case 'viewReceipt':
+            var request = JSON.stringify({ adminUser: adminUser, adminPass: adminPass, action: action });
+            $.post( "admin.php", { request: request }, function( response ) {
+                try {
+                    response = jQuery.parseJSON(response);
+                } catch(e) {
+                    response = {};
+                }
+                
+                if(response.error){
+                    alert(response.error);
+                } else if(response.result){
+                    
+                    var receipts = response.result;
+                    
+                    if(receipts.length < 1){
+                        $('#formFields').html('No receipts have been uploaded.');
+                    } else {
+                        var source = "<table class='AdminTable'><tr><td>BookingID</td><td></td></tr>";
+                        for(var i=0; i<receipts.length; i++){
+                            var ID = receipts[i].substring( 0, receipts[i].length-4 );
+                            
+                            source += "<tr><td>" + ID + "</td>" +
+                                      "<td><a href='javascript:openReceipt(" + ID + ")'>" +
+                                      "View Receipt</a></td></tr>";
+                        }
+                        source += "</table><br><br>BookingID of receipt to delete: " +
+                                  "<input type='text' id='idNum'>";
+                        $('#formFields').html(source);
+                    }
+                } else {
+                    alert(unexpectedError);
+                }
+            })
+            .fail(function(){
+                alert(connectionError);
+            });
+            break;
         
     }
 }
@@ -401,10 +439,13 @@ function submitForm(){
             break;
         case 'viewRate':
         case 'viewBooking':
+        case 'viewReceipt':
             if(selectedAction == 'viewRate'){
                 request.action = 'deleteRate';
-            } else {
+            } else if(selectedAction == 'viewBooking'){
                 request.action = 'deleteBooking';
+            } else {
+                request.action = 'deleteReceipt';
             }
             
             request.idNum = $('#idNum')[0].value;
@@ -421,8 +462,10 @@ function submitForm(){
                 } else if(response.success){
                     if(selectedAction == 'viewRate'){
                         alert('Rate deleted successfully.');
-                    } else {
+                    } else if(selectedAction == 'viewBooking'){
                         alert('Booking canceled successfully.');
+                    } else {
+                        alert('Receipt deleted successfully.');
                     }
                     changeUI(selectedAction);
                 } else {
@@ -662,4 +705,31 @@ function submitForm(){
 
             break;
     }
+}
+
+function openReceipt( id ){
+    var request = JSON.stringify({ adminUser: adminUser, adminPass: adminPass, action: 'openReceipt', ID: id });
+    $.post( "admin.php", { request: request }, function( response ) {
+        try {
+            response = jQuery.parseJSON(response);
+        } catch(e) {
+            response = {};
+        }
+        
+        if(response.error){
+            alert(response.error);
+        } else if(response.GUID){
+        
+            var path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/',
+                pdfURL = path + 'resources/receiptCache/' + escape(response.GUID) + '.pdf',
+                viewerURL = './Viewer.js/#' + pdfURL;
+            window.open(viewerURL);
+            
+        } else {
+            alert(unexpectedError);
+        }
+    })
+    .fail(function(){
+        alert(connectionError);
+    });
 }

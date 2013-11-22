@@ -526,7 +526,8 @@ function viewReceipt( id ){
         if(response.error){
             alert(response.error);
         } else if(response.GUID){
-            var pdfURL = window.location.pathname + 'resources/receiptCache/' + escape(response.GUID) + '.pdf',
+            var path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/',
+                pdfURL = path + 'resources/receiptCache/' + escape(response.GUID) + '.pdf',
                 viewerURL = './Viewer.js/#' + pdfURL;
             window.open(viewerURL);
         } else {

@@ -250,9 +250,14 @@ case "addLogo":
     }
     break;
 case "viewLogo":
+case "viewReceipt":
     authenticateAdmin($request);
     
-    $path = dirname(__FILE__).'/resources/logos/';
+    if($request->action == "viewLogo"){
+        $path = dirname(__FILE__).'/resources/logos/';
+    } else {
+        $path = dirname(__FILE__).'/resources/receipts/';
+    }
     $fileArray = scandir($path);
     
     for($i=2; $i<count($fileArray); $i++){
@@ -375,7 +380,12 @@ case "addReceipt":
     if(!file_put_contents($filepath, $pdfData)){
         die('{"error":"The receipt could not be saved."}');
     }
-    chmod($filepath, 0640);  // Prevent users from accessing the file
+    if(!chmod($filepath, 0640)){  // Prevent users from accessing the file
+        if(is_file($filepath)){
+                unlink($filepath);
+        }
+        die('{"error":"Couldn\'t set file permissions."}');
+    }
     
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
@@ -398,6 +408,85 @@ case "addReceipt":
         $connection = null;
     } catch(PDOException $e) {
         error_log($e->getMessage());
+    }
+    
+    break;
+case "openReceipt":
+    authenticateAdmin($request);
+    
+    if(!isset($request->ID)){
+        die($missingParametersError);
+    }
+    
+    ob_end_clean(); // Clean buffer
+    ignore_user_abort(true); // Keep running script after user disconnects
+    set_time_limit(0); // Let the script run forever
+    ob_start(); // Start buffering output
+    
+    $id = intval($request->ID);    
+    $resourceDir = dirname(__FILE__).'/resources/';
+    $tempGUID = com_create_guid();
+    $receiptFile = $resourceDir.'receipts/'.$id.'.pdf';
+    $tempFile = $resourceDir.'receiptCache/'.$tempGUID.'.pdf';
+
+    if (!copy($receiptFile, $tempFile)) {
+        die('{"error":"Could not create temporary file."}');
+    }
+    // Make the temp file readable by the user
+    chmod($tempFile, 0644);
+
+    echo '{"GUID":"'.$tempGUID.'"}';
+
+    session_write_close(); // Close the session so other requests aren't blocked
+    header("Content-Encoding: none"); //send header to avoid the browser side to take content as gzip format
+    header("Content-Length: ".ob_get_length()); //send length header
+    header("Connection: close");
+    ob_end_flush(); // Flush ob buffer to normal buffer
+    flush(); // Flush normal buffer to output
+
+    // Wait for the user to load the temp PDF before timing out.
+    sleep(1.5*60);
+
+    if(is_file($tempFile)){
+        unlink($tempFile);
+    } else {
+        error_log('Could not find temp file: '.$tempFile);
+    }
+    
+    die();
+case "deleteReceipt":
+    authenticateAdmin($request);
+    
+    if(!isset($request->idNum)){
+        die($missingParametersError);
+    }
+    
+    $ID = intval($request->idNum);
+    $path = dirname(__FILE__).'/resources/receipts/';
+    $filepath = $path.$ID.'.pdf';
+    
+    try {
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
+
+        $statement = $connection->prepare("UPDATE bookedflights SET hasReceipt = :hasReceipt WHERE BookingID = :ID");
+        $statement->bindValue(":hasReceipt", 0);
+        $statement->bindValue(":ID", $ID);
+        $statement->execute();
+        
+        if($statement->rowCount() > 0){
+            $response->success = 1;
+        } else {
+            die('{"error":"The booking could not be updated."}');
+        }
+        
+        // Close the connection
+        $connection = null;
+    } catch(PDOException $e) {
+        error_log($e->getMessage());
+    }
+    
+    if(is_file($filepath)){
+        unlink($filepath);
     }
     
     break;
