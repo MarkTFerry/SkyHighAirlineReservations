@@ -10,6 +10,8 @@
     border-radius:25px;
     
     text-align: center;
+    
+    overflow-x: auto
 }
 
 .Login,.Register,.FlightList {
@@ -18,7 +20,7 @@
 }
 
 .ViewBookedFlights {
-    min-width: 95%;
+    min-width: 90%;
 }
 
 .View.Active {
