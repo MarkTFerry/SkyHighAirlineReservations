@@ -50,6 +50,7 @@ function startup() {
     
     $('#ratesDomestic').click();
     $('#ratesEconomic').click();
+    getRates();
     
     $(function() {
         var options = {
