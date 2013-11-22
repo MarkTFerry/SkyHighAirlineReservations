@@ -14,6 +14,12 @@ $PASS_DELETE = '5RnpTTW3nNQpfGYH';
 
 $PassSaltConstant = 'SkyHighPass';
 
+$adminTable = 'admins';
+$userTable = 'users';
+$rateTable = 'rates';
+$bookedFlightsTable = 'bookedflights';
+
+
 /*
 This function uses the cookie stored during login to check that the user
 is using a valid account. If the cookies is not present or the account data
@@ -22,7 +28,7 @@ This function should be called at the beginning of endpoints that require
 a user to be logged in.
 */
 function authenticateUser() {
-    global $PassSaltConstant, $DB_HOST, $DB_NAME, $USER_SELECT, $PASS_SELECT;
+    global $PassSaltConstant, $DB_HOST, $DB_NAME, $USER_SELECT, $PASS_SELECT, $userTable;
 
     if( !isset($_COOKIE["user"]) || !isset($_COOKIE["pass"]) ){
     die('{"error":"Authenitcation Error: You need to login first."}');
@@ -34,7 +40,7 @@ function authenticateUser() {
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
 
-        $statement = $connection->prepare("SELECT * FROM users WHERE Username = :user AND Password = :pass");
+        $statement = $connection->prepare("SELECT * FROM ".$userTable." WHERE Username = :user AND Password = :pass");
         $statement->bindParam(':user', $user);
         $statement->bindParam(':pass', $pass);
         

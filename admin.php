@@ -17,7 +17,7 @@ function authenticateAdmin($request){
         // Parameters are defined in common.php
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
 
-        $statement = $connection->prepare("SELECT * FROM admins WHERE Username = :user AND Password = :pass");
+        $statement = $connection->prepare("SELECT * FROM ".$adminTable." WHERE Username = :user AND Password = :pass");
         $statement->bindValue(':user', $userUpper);
         $statement->bindValue(':pass', $passwordHashed);
         
@@ -72,10 +72,10 @@ case "addUser":
 
         $userUpper = strtoupper($request->user);
         if($request->action == "addAdmin"){
-            $statement = $connection->prepare("INSERT INTO admins (Username,Password) VALUES (:user,:pass)");
+            $statement = $connection->prepare("INSERT INTO ".$adminTable." (Username,Password) VALUES (:user,:pass)");
             $passHashed = sha1($request->pass.$userUpper.$PassSaltConstant.$AdminSaltConstant);
         } else {
-            $statement = $connection->prepare("INSERT INTO users (Username,Password) VALUES (:user,:pass)");
+            $statement = $connection->prepare("INSERT INTO ".$userTable." (Username,Password) VALUES (:user,:pass)");
             $passHashed = sha1($request->pass.$userUpper.$PassSaltConstant);
         }
         
@@ -104,13 +104,13 @@ case "viewBooking":
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
 
         if($request->action == "viewAdmin"){
-            $statement = $connection->prepare("SELECT * FROM admins");
+            $statement = $connection->prepare("SELECT * FROM ".$adminTable);
         } else if($request->action == "viewUser"){
-            $statement = $connection->prepare("SELECT * FROM users");
+            $statement = $connection->prepare("SELECT * FROM ".$userTable);
         } else if($request->action == "viewRate"){
-            $statement = $connection->prepare("SELECT * FROM rates");
+            $statement = $connection->prepare("SELECT * FROM ".$rateTable);
         } else {
-            $statement = $connection->prepare("SELECT * FROM bookedflights");
+            $statement = $connection->prepare("SELECT * FROM ".$bookedFlightsTable);
         }
         
         $statement->execute();
@@ -137,9 +137,9 @@ case "deleteUser":
         $upperUser = strtoupper($request->user);
         
         if($request->action == "deleteAdmin"){
-            $statement = $connection->prepare("DELETE FROM admins WHERE Username = :user");
+            $statement = $connection->prepare("DELETE FROM ".$adminTable." WHERE Username = :user");
         } else {
-            $statement = $connection->prepare("DELETE FROM users WHERE Username = :user");
+            $statement = $connection->prepare("DELETE FROM ".$userTable." WHERE Username = :user");
         }        
         
         $statement->bindValue(':user', $upperUser);
@@ -168,7 +168,7 @@ case "addRate":
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
 
-        $statement = $connection->prepare("INSERT INTO rates (`ID`,`Airline`,`Type`,`Class`,`From`,`To`,`Price`,`Time`) 
+        $statement = $connection->prepare("INSERT INTO ".$rateTable." (`ID`,`Airline`,`Type`,`Class`,`From`,`To`,`Price`,`Time`) 
                                            VALUES (NULL,:Airline,:Type,:Class,:From,:To,:Price,:Time)");
         $statement->bindValue(":Airline", $request->airline);
         $statement->bindValue(":Type", $request->type, PDO::PARAM_INT);
@@ -203,9 +203,9 @@ case "deleteBooking":
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_DELETE, $PASS_DELETE);
        
         if($request->action == "deleteRate"){
-            $statement = $connection->prepare("DELETE FROM rates WHERE ID = :idNum");
+            $statement = $connection->prepare("DELETE FROM ".$rateTable." WHERE ID = :idNum");
         } else {
-            $statement = $connection->prepare("DELETE FROM bookedflights WHERE BookingID = :idNum");
+            $statement = $connection->prepare("DELETE FROM ".$bookedFlightsTable." WHERE BookingID = :idNum");
         }
         $statement->bindValue(':idNum', $request->idNum, PDO::PARAM_INT);
         $statement->execute();
@@ -306,7 +306,7 @@ case "addBooking":
         // Parameters are defined in common.php
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
 
-        $statement = $connection->prepare("SELECT * FROM users WHERE Username = :user");
+        $statement = $connection->prepare("SELECT * FROM ".$userTable." WHERE Username = :user");
         $statement->bindValue(':user', $userUpper);
         
         $statement->execute();
@@ -315,7 +315,7 @@ case "addBooking":
             die('{"error":"An account with that username does not exist."}');
         }
         
-        $statement = $connection->prepare("SELECT * FROM rates WHERE ID = :rateID");
+        $statement = $connection->prepare("SELECT * FROM ".$rateTable." WHERE ID = :rateID");
         $statement->bindValue(':rateID', $rateID);
         
         $statement->execute();
@@ -326,7 +326,7 @@ case "addBooking":
         
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
         
-        $statement = $connection->prepare("INSERT INTO bookedflights (BookingID,Username,Date,Adults,Children,Infants,RateID,hasReceipt) 
+        $statement = $connection->prepare("INSERT INTO ".$bookedFlightsTable." (BookingID,Username,Date,Adults,Children,Infants,RateID,hasReceipt) 
                                    VALUES (NULL,:User,:Date,:Adults,:Children,:Infants,:RateID,:hasReciept)");
                                    
         $statement->bindValue(':User', $userUpper);
@@ -390,7 +390,7 @@ case "addReceipt":
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
 
-        $statement = $connection->prepare("UPDATE bookedflights SET hasReceipt = :hasReceipt WHERE BookingID = :ID");
+        $statement = $connection->prepare("UPDATE ".$bookedFlightsTable." SET hasReceipt = :hasReceipt WHERE BookingID = :ID");
         $statement->bindValue(":hasReceipt", 1);
         $statement->bindValue(":ID", $ID);
         $statement->execute();
@@ -468,7 +468,7 @@ case "deleteReceipt":
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
 
-        $statement = $connection->prepare("UPDATE bookedflights SET hasReceipt = :hasReceipt WHERE BookingID = :ID");
+        $statement = $connection->prepare("UPDATE ".$bookedFlightsTable." SET hasReceipt = :hasReceipt WHERE BookingID = :ID");
         $statement->bindValue(":hasReceipt", 0);
         $statement->bindValue(":ID", $ID);
         $statement->execute();
@@ -515,7 +515,7 @@ case "setupServer":
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $request->adminUser, $request->adminPass);
 
-        $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `bookedflights` (
+        $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `".$bookedFlightsTable."` (
                                           `BookingID` int(11) NOT NULL AUTO_INCREMENT,
                                           `Username` varchar(100) NOT NULL,
                                           `Date` varchar(10) NOT NULL,
@@ -529,7 +529,7 @@ case "setupServer":
         $statement->execute();
         $response->results = $response->results."<br><br>Created table for booked flights";
         
-        $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `rates` (
+        $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `".$rateTable."` (
                                           `ID` int(11) NOT NULL AUTO_INCREMENT,
                                           `Airline` varchar(50) NOT NULL,
                                           `Type` int(11) NOT NULL,
@@ -543,7 +543,7 @@ case "setupServer":
         $statement->execute();
         $response->results = $response->results."<br><br>Created table for rates";
         
-        $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `users` (
+        $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `".$userTable."` (
                                           `Username` varchar(100) NOT NULL,
                                           `Password` varchar(40) NOT NULL,
                                           PRIMARY KEY (`Username`)
@@ -551,7 +551,7 @@ case "setupServer":
         $statement->execute();
         $response->results = $response->results."<br><br>Created table for users";
         
-        $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `admins` (
+        $statement = $connection->prepare("CREATE TABLE IF NOT EXISTS `".$adminTable."` (
                                           `Username` varchar(100) NOT NULL,
                                           `Password` varchar(40) NOT NULL,
                                           PRIMARY KEY (`Username`)
@@ -563,7 +563,7 @@ case "setupServer":
         $defaultPass = "password";
         $defaultPassHashed = sha1($defaultPass.$defaultUser.$PassSaltConstant.$AdminSaltConstant);
         
-        $statement = $connection->prepare("INSERT INTO admins (Username,Password) VALUES (:user,:pass)");
+        $statement = $connection->prepare("INSERT INTO ".$adminTable." (Username,Password) VALUES (:user,:pass)");
         $statement->bindParam(':user', $defaultUser);
         $statement->bindParam(':pass', $defaultPassHashed);
         $statement->execute();

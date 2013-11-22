@@ -22,7 +22,7 @@ try {
     // Parameters are defined in common.php
     $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
 
-    $statement = $connection->prepare("SELECT * FROM users WHERE Username = :user AND Password = :pass");
+    $statement = $connection->prepare("SELECT * FROM ".$userTable." WHERE Username = :user AND Password = :pass");
     $statement->bindParam(':user', $user);
     $statement->bindParam(':pass', $pass);
     

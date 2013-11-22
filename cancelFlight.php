@@ -20,7 +20,7 @@ try {
     // Parameters are defined in common.php
     $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_DELETE, $PASS_DELETE);
 
-    $statement = $connection->prepare("DELETE FROM bookedflights WHERE Username = :user and BookingID = :ID");
+    $statement = $connection->prepare("DELETE FROM ".$bookedFlightsTable." WHERE Username = :user and BookingID = :ID");
     $statement->bindValue(':user', $user);
     $statement->bindValue(':ID', $ID);
     

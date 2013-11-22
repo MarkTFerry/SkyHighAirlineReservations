@@ -28,7 +28,7 @@ try {
     // Parameters are defined in common.php
     $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
 
-    $statement = $connection->prepare("SELECT * FROM bookedflights WHERE Username = :user and BookingID = :id and hasReceipt = :hasReceipt");
+    $statement = $connection->prepare("SELECT * FROM ".$bookedFlightsTable." WHERE Username = :user and BookingID = :id and hasReceipt = :hasReceipt");
     $statement->bindValue(':user', $user);
     $statement->bindValue(':id', $id);
     $statement->bindValue(':hasReceipt', 1);

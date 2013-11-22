@@ -31,7 +31,7 @@ try {
     // Parameters are defined in common.php
     $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
     
-    $statement = $connection->prepare("SELECT * FROM rates WHERE ID = :RateID");                                       
+    $statement = $connection->prepare("SELECT * FROM ".$rateTable." WHERE ID = :RateID");                                       
     $statement->bindValue(':RateID', $rateID);
     $statement->execute();
     $rateObject = $statement->fetch();
@@ -42,7 +42,7 @@ try {
     
     $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
     
-    $statement = $connection->prepare("INSERT INTO bookedflights (BookingID,Username,Date,Adults,Children,Infants,RateID,hasReceipt) 
+    $statement = $connection->prepare("INSERT INTO ".$bookedFlightsTable." (BookingID,Username,Date,Adults,Children,Infants,RateID,hasReceipt) 
                                        VALUES (NULL,:User,:Date,:Adults,:Children,:Infants,:RateID,:hasReciept)");
                                        
     $statement->bindValue(':User', $user);

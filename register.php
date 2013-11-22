@@ -21,7 +21,7 @@ try {
     $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
 
     
-    $statement = $connection->prepare("SELECT * FROM users WHERE Username = :user");
+    $statement = $connection->prepare("SELECT * FROM ".$userTable." WHERE Username = :user");
     $statement->bindParam(':user', $user);
     
     $statement->execute();
@@ -35,7 +35,7 @@ try {
     // Establish a new connection since $USER_SELECT doesn't have permission to insert rows
     $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
     
-    $statement = $connection->prepare("INSERT INTO users (Username,Password) VALUES (:user,:pass)");
+    $statement = $connection->prepare("INSERT INTO ".$userTable." (Username,Password) VALUES (:user,:pass)");
     $statement->bindParam(':user', $user);
     $statement->bindParam(':pass', $pass);
 
