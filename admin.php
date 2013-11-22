@@ -241,7 +241,11 @@ case "viewLogo":
     authenticateAdmin($request);
     
     $path = dirname(__FILE__).'/resources/logos/';
-    $response->result = scandir($path);
+    $fileArray = scandir($path);
+    
+    for($i=2; $i<count($fileArray); $i++){
+        $response->result[$i-2] = $fileArray[$i];
+    }
     
     break;
 case "deleteLogo":

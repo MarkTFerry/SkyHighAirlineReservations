@@ -236,9 +236,6 @@ function changeUI( action ){
                     } else {
                         var source = "<table class='AdminTable'><tr><td>Airline</td><td>Thumbnail</td></tr>";
                         for(var i=0; i<logos.length; i++){
-                            if( (logos[i] == '.') || (logos[i] == '..') ){
-                                continue;
-                            }
                             var imgFile = path + logos[i],
                                 airline = logos[i].substring( 0, logos[i].length-4 );
                             
