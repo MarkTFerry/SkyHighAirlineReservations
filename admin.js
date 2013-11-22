@@ -323,6 +323,13 @@ function changeUI( action ){
                 alert(connectionError);
             });
             break;
+        case 'addReceipt':
+            $('#formFields').html(
+                "BookingID: <input type='text' id='idNum'><br><br>" +
+                "Receipt PDF: <input type='file' id='pdf'>"
+                );
+            break;
+        
     }
 }
 
@@ -621,6 +628,38 @@ function submitForm(){
             .fail(function(){
                 alert(connectionError);
             });
+            break;
+        case 'addReceipt':
+            var reader = new FileReader();
+            reader.onload = function(e){
+                var ID = $('#idNum').val(),
+                    pdfData = event.target.result;
+                
+                request.ID = ID;
+                request.pdfData = pdfData;
+                request = JSON.stringify( request );
+                
+                $.post( "admin.php", { request: request }, function( response ) {
+                    try {
+                        response = jQuery.parseJSON(response);
+                    } catch(e) {
+                        response = {};
+                    }
+                    
+                    if(response.error){
+                        alert(response.error);
+                    } else if(response.success){
+                        alert('Receipt uploaded successfully.');
+                    } else {
+                        alert(unexpectedError);
+                    }
+                })
+                .fail(function(){
+                    alert(connectionError);
+                });
+            }
+            reader.readAsDataURL( document.getElementById('pdf').files[0] );
+
             break;
     }
 }

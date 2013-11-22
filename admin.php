@@ -345,6 +345,62 @@ case "addBooking":
     }
     
     break;
+case "addReceipt":
+    authenticateAdmin($request);
+    
+    if(!isset($request->ID) || !isset($request->pdfData)){
+        die($missingParametersError);
+    }
+    
+    $ID = intval($request->ID);
+    $path = dirname(__FILE__).'/resources/receipts/';
+    $filepath = $path.$ID.'.pdf';
+    
+    // All PDFs contain %PDF- as their first 5 characters. In base64, this is JVBERi0
+    if( substr($request->pdfData,0,35) != 'data:application/pdf;base64,JVBERi0'){
+        die('{"error":"The uploaded file is not a PDF. Please convert it and re-upload it or upload a different document."}');
+    }
+    
+    // Remove header from data URI and decode
+    $pdfData = base64_decode( substr( $request->pdfData, strpos($request->pdfData,",")+1) );
+    
+    if(!$pdfData){
+        die('{"error":"Could not decode pdf. Please try again or upload a different file."}');
+    }
+     
+    if(is_file( $filepath )){
+        die('{"error":"A receipt for this booking already exists. Please delete the old receipt first."}');
+    }
+
+    if(!file_put_contents($filepath, $pdfData)){
+        die('{"error":"The receipt could not be saved."}');
+    }
+    chmod($filepath, 0640);  // Prevent users from accessing the file
+    
+    try {
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
+
+        $statement = $connection->prepare("UPDATE bookedflights SET hasReceipt = :hasReceipt WHERE BookingID = :ID");
+        $statement->bindValue(":hasReceipt", 1);
+        $statement->bindValue(":ID", $ID);
+        $statement->execute();
+        
+        if($statement->rowCount() > 0){
+            $response->success = 1;
+        } else {
+            $response->error = "The booking could not be updated.";
+            if(is_file($filepath)){
+                unlink($filepath);
+            }
+        }
+        
+        // Close the connection
+        $connection = null;
+    } catch(PDOException $e) {
+        error_log($e->getMessage());
+    }
+    
+    break;
 case "setupServer":
     $connection = mysql_connect($DB_HOST, $request->adminUser, $request->adminPass);
     if (!$connection) {
@@ -428,7 +484,7 @@ case "setupServer":
         $statement->execute();
         $response->results = $response->results."<br><br>Added user for SELECT";
         
-        $statement = $connection->prepare("GRANT SELECT, INSERT ON *.* TO '".$USER_INSERT."'@'localhost' IDENTIFIED BY '".$PASS_INSERT."';");
+        $statement = $connection->prepare("GRANT SELECT, INSERT, UPDATE ON *.* TO '".$USER_INSERT."'@'localhost' IDENTIFIED BY '".$PASS_INSERT."';");
         $statement->execute();
         $response->results = $response->results."<br><br>Added user for INSERT";
         
