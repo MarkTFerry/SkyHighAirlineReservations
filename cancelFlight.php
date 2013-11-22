@@ -29,6 +29,12 @@ try {
     $response = new stdClass();
     if($statement->rowCount() > 0){
             $response->success = 1;
+            
+            $receiptFile = dirname(__FILE__).'/resources/receipts/'.$ID.'.pdf';
+            if(is_file($receiptFile)){
+                unlink($receiptFile);
+            }
+            
         } else {
             $response->error = "The flight could not be canceled.";
         }

@@ -10,7 +10,7 @@ $missingParametersError = '{"error":"Your request is missing one or more paramet
 $SQLerror = '{"error":"SQL statement execution failed. View the error log for more details."}';
 
 function authenticateAdmin($request){
-    global $PassSaltConstant, $AdminSaltConstant, $DB_HOST, $DB_NAME, $USER_SELECT, $PASS_SELECT;
+    global $PassSaltConstant, $AdminSaltConstant, $DB_HOST, $DB_NAME, $USER_SELECT, $PASS_SELECT, $adminTable;
     $userUpper = strtoupper($request->adminUser);
     $passwordHashed = sha1($request->adminPass.$userUpper.$PassSaltConstant.$AdminSaltConstant);
     try {
@@ -36,6 +36,51 @@ function authenticateAdmin($request){
 
 function cleanFilename($name){
     return preg_replace('/[^A-Za-z0-9 _ .-]/', '', $name);
+}
+
+function bulkDeleteBookings( $value, $collumn ){
+    global $PassSaltConstant, $AdminSaltConstant, $DB_HOST, $DB_NAME, $USER_DELETE, $PASS_DELETE, $bookedFlightsTable;
+    try {
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_DELETE, $PASS_DELETE);
+       
+        if($collumn == "user"){
+            $userUpper = strtoupper($value);
+            $statement = $connection->prepare("SELECT * FROM ".$bookedFlightsTable." WHERE Username = :user");
+            $statement->bindValue(':user', $userUpper);
+        } else {
+            $ID = intval($value);
+            $statement = $connection->prepare("SELECT * FROM ".$bookedFlightsTable." WHERE RateID = :idNum");
+            $statement->bindValue(':idNum', $ID, PDO::PARAM_INT);
+        }
+        
+        $statement->execute();
+        $result = $statement->fetchAll();
+        
+        if($collumn == "user"){
+            $userUpper = strtoupper($value);
+            $statement = $connection->prepare("DELETE FROM ".$bookedFlightsTable." WHERE Username = :user");
+            $statement->bindValue(':user', $userUpper);
+        } else {
+            $ID = intval($value);
+            $statement = $connection->prepare("DELETE FROM ".$bookedFlightsTable." WHERE RateID = :idNum");
+            $statement->bindValue(':idNum', $ID, PDO::PARAM_INT);
+        }
+        
+        $statement->execute();
+        
+        if(count($result) > 0){
+            for($i=0;$i<count($result);$i++){
+                $receiptFile = dirname(__FILE__).'/resources/receipts/'.$result[$i]['BookingID'].'.pdf';
+                if( is_file($receiptFile) ){
+                    unlink($receiptFile);
+                }
+            }
+        }
+        // Close the connection
+        $connection = null;
+    } catch(PDOException $e) {
+        error_log($e->getMessage());
+    }
 }
 
 if(!isset($_POST["request"])){
@@ -147,6 +192,9 @@ case "deleteUser":
         
         if($statement->rowCount() > 0){
             $response->success = 1;
+            if($request->action == "deleteUser"){
+                bulkDeleteBookings( $upperUser, 'user' );
+            }
         } else {
             $response->error = "An account with that name does not exist.";
         }
@@ -199,6 +247,8 @@ case "deleteBooking":
         die($missingParametersError);
     }
     
+    $ID = intval($request->idNum);
+    
     try {
         $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_DELETE, $PASS_DELETE);
        
@@ -207,11 +257,19 @@ case "deleteBooking":
         } else {
             $statement = $connection->prepare("DELETE FROM ".$bookedFlightsTable." WHERE BookingID = :idNum");
         }
-        $statement->bindValue(':idNum', $request->idNum, PDO::PARAM_INT);
+        $statement->bindValue(':idNum', $ID, PDO::PARAM_INT);
         $statement->execute();
         
         if($statement->rowCount() > 0){
             $response->success = 1;
+            
+            $receiptFile = dirname(__FILE__).'/resources/receipts/'.$ID.'.pdf';
+            if( ($request->action == "deleteBooking") && is_file($receiptFile) ){
+                unlink($receiptFile);
+            } else {
+                bulkDeleteBookings( $ID, 'id' );
+            }
+            
         } else {
             if($request->action == "deleteRate"){
                 $response->error = "A rate with that ID does not exist.";
@@ -260,6 +318,7 @@ case "viewReceipt":
     }
     $fileArray = scandir($path);
     
+    $response->result = array();
     for($i=2; $i<count($fileArray); $i++){
         $response->result[$i-2] = $fileArray[$i];
     }
