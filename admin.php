@@ -266,6 +266,73 @@ case "deleteLogo":
     }
     
     break;
+case "addBooking":
+    authenticateAdmin($request);
+    
+    if( !isset($request->user) || !isset($request->dateVal) || !isset($request->adults) ||
+        !isset($request->children) || !isset($request->infants) || !isset($request->rateID) ){
+        die($missingParametersError);
+    }
+    
+    $userUpper = strtoupper($request->user);
+    
+    if(!validateDate($request->dateVal)){
+        die('{"error":"The date entered is invalid."}');
+    }
+    
+    $adults = intval($request->adults);
+    $children = intval($request->children);
+    $infants = intval($request->infants);
+    $rateID = intval($request->rateID);
+    
+    try {
+        // Parameters are defined in common.php
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_SELECT, $PASS_SELECT);
+
+        $statement = $connection->prepare("SELECT * FROM users WHERE Username = :user");
+        $statement->bindValue(':user', $userUpper);
+        
+        $statement->execute();
+        
+        if(!$statement->fetch()){
+            die('{"error":"An account with that username does not exist."}');
+        }
+        
+        $statement = $connection->prepare("SELECT * FROM rates WHERE ID = :rateID");
+        $statement->bindValue(':rateID', $rateID);
+        
+        $statement->execute();
+        
+        if(!$statement->fetch()){
+            die('{"error":"A rate with that ID does not exist."}');
+        }
+        
+        $connection = new PDO("mysql:host=$DB_HOST;dbname=$DB_NAME", $USER_INSERT, $PASS_INSERT);
+        
+        $statement = $connection->prepare("INSERT INTO bookedflights (BookingID,Username,Date,Adults,Children,Infants,RateID,hasReceipt) 
+                                   VALUES (NULL,:User,:Date,:Adults,:Children,:Infants,:RateID,:hasReciept)");
+                                   
+        $statement->bindValue(':User', $userUpper);
+        $statement->bindValue(':Date', $request->dateVal);
+        $statement->bindValue(':Adults', $adults);
+        $statement->bindValue(':Children', $children);
+        $statement->bindValue(':Infants', $infants);
+        $statement->bindValue(':RateID', $rateID);
+        $statement->bindValue(':hasReciept', 0);
+
+        $statement->execute();
+        
+        if($statement->rowCount() > 0){
+            $response->success = 1;
+        } else {
+            $response->error = "The flight could not be booked.";
+        }
+        
+    } catch(PDOException $e) {
+        error_log($e->getMessage());
+    }
+    
+    break;
 case "setupServer":
     $connection = mysql_connect($DB_HOST, $request->adminUser, $request->adminPass);
     if (!$connection) {

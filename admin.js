@@ -255,6 +255,26 @@ function changeUI( action ){
                 alert(connectionError);
             });
             break;
+        case 'addBooking':
+            $('#formFields').html(
+                "Username: <input type='text' id='user'><br>" +
+                "Date: <input type='text' id='date' class='getDate'><br>" +
+                "Adults: <input type='text' id='adults'><br>" +
+                "Children: <input type='text' id='children'><br>" +
+                "Infants: <input type='text' id='infants'><br>" +
+                "RateID: <input type='text' id='rateID'>"
+            );
+            
+            $(function() {
+                var options = {
+                    changeYear: true,
+                    yearRange: "0:+2",
+                    minDate: 0
+                }
+                $(".getDate").datepicker(options);
+            });
+            
+            break;
     }
 }
 
@@ -508,6 +528,34 @@ function submitForm(){
                 } else if(response.success){
                     alert('Logo deleted successfully.');
                     changeUI(selectedAction);
+                } else {
+                    alert(unexpectedError);
+                }
+            })
+            .fail(function(){
+                alert(connectionError);
+            });
+            break;
+        case 'addBooking':
+            request.user = $('#user').val();
+            request.dateVal = $('.getDate').val();
+            request.adults = $('#adults').val();
+            request.children = $('#children').val();
+            request.infants = $('#infants').val();
+            request.rateID = $('#rateID').val();
+            
+            request = JSON.stringify( request );
+            $.post( "admin.php", { request: request }, function( response ) {
+                try {
+                    response = jQuery.parseJSON(response);
+                } catch(e) {
+                    response = {};
+                }
+
+                if(response.error){
+                    alert(response.error);
+                } else if(response.success){
+                    alert('Booking added successfully.');
                 } else {
                     alert(unexpectedError);
                 }

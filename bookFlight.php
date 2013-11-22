@@ -11,12 +11,6 @@ The endpoint always returns the rateObject if the rateID is valid.
 include 'common.php';
 authenticateUser();
 
-function validateDate($date, $format = 'm/d/Y')
-{
-    $d = DateTime::createFromFormat($format, $date);
-    return $d && $d->format($format) == $date;
-}
-
 if( !isset($_POST["date"]) || !isset($_POST["adults"]) || !isset($_POST["children"])
     || !isset($_POST["infants"]) || !isset($_POST["rateID"]) ){
     die('{"error":"One or more parameters is missing."}');
