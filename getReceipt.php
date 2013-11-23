@@ -49,10 +49,10 @@ if(!$isBookingOwner){
 }
 
 $resourceDir = dirname(__FILE__).'/resources/';
-$tempGUID = com_create_guid();
+//$tempGUID = com_create_guid();
+$tempGUID = substr(str_shuffle(MD5(microtime())), 0, 15);
 $receiptFile = $resourceDir.'receipts/'.$id.'.pdf';
 $tempFile = $resourceDir.'receiptCache/'.$tempGUID.'.pdf';
-
 
 if (!copy($receiptFile, $tempFile)) {
     die('{"error":"Could not create temporary file."}');
