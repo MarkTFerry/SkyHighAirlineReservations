@@ -29,8 +29,6 @@ try {
     $statement->execute();
     
     if($statement->fetch()){
-        setcookie('user',$user);
-        setcookie('pass',$passUnhashed);
         echo '{"success":1}';
     } else {
         echo '{"error":"The username or password you entered is incorrect. Please try again."}';

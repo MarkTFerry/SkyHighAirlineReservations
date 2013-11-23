@@ -77,6 +77,9 @@ function login() {
     var user = $('#loginUser')[0].value;
     var pass = $('#loginPass')[0].value;
     
+    document.cookie = "user=" + user;
+    document.cookie = "pass=" + pass;
+    
     if( (user.length < 1) || (pass.length < 1) ){
         alert('Please enter both a Username and a Password.');
         return;
