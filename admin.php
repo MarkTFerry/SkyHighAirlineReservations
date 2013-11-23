@@ -87,7 +87,7 @@ if(!isset($_POST["request"])){
     die('{"error":"Request string missing or empty."}');
 }
 
-$request = json_decode($_POST['request']);
+$request = json_decode( stripslashes($_POST['request']) );
 if(!$request){
     die('{"error":"The request could not be parsed."}');
 }
