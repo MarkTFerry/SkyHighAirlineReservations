@@ -1,23 +1,23 @@
 <?php
 
 $DB_HOST = '127.0.0.1';
-$DB_NAME = 'skyhigh';
+$DB_NAME = 'cse360fa_t29-32';
 
-$USER_SELECT = 'SkyHighWebAppS';
-$PASS_SELECT = 'oNTYVidPlHydqKrM';
+$USER_SELECT = '';
+$PASS_SELECT = '';
 
-$USER_INSERT = 'SkyHighWebAppI';
-$PASS_INSERT = 'Uh5kjk37TXhQ2bOm';
+$USER_INSERT = '';
+$PASS_INSERT = '';
 
-$USER_DELETE = 'SkyHighWebAppD';
-$PASS_DELETE = '5RnpTTW3nNQpfGYH';
+$USER_DELETE = '';
+$PASS_DELETE = '';
 
 $PassSaltConstant = 'SkyHighPass';
 
-$adminTable = 'admins';
-$userTable = 'users';
-$rateTable = 'rates';
-$bookedFlightsTable = 'bookedflights';
+$adminTable = 't29_skyhigh_admins';
+$userTable = 't29_skyhigh_users';
+$rateTable = 't29_skyhigh_rates';
+$bookedFlightsTable = 't29_skyhigh_bookedflights';
 
 
 /*
@@ -56,10 +56,20 @@ function authenticateUser() {
     }
 }
 
-function validateDate($date, $format = 'm/d/Y')
+/*function validateDate($date, $format = 'm/d/Y')
 {
     $d = DateTime::createFromFormat($format, $date);
     return $d && $d->format($format) == $date;
+}*/
+
+function validateDate($date){
+    $testDate = explode('/', $date);
+    if(count($testDate) == 3){
+        if(checkdate($testDate[0], $testDate[1], $testDate[2])){
+            return true;
+        }
+    }
+    return false;
 }
 
 ?>

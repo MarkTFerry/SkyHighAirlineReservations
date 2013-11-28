@@ -432,7 +432,7 @@ function changeViewBookedFlights() {
                                 if(rateCache[ID]["Class"] == EconomicInt){ table.rows[i+1].cells[2].innerHTML = 'Economic'; }
                                 if(rateCache[ID]["Class"] == BusinessInt){ table.rows[i+1].cells[2].innerHTML = 'Business'; }
                                 if(rateCache[ID]["Type"] == DomesticInt){ table.rows[i+1].cells[3].innerHTML = 'Domestic'; }
-                                if(rateCache[ID]["Type"] == InternationalInt){ table.rows[i].cells[3].innerHTML = 'International'; }
+                                if(rateCache[ID]["Type"] == InternationalInt){ table.rows[i+1].cells[3].innerHTML = 'International'; }
                                 table.rows[i+1].cells[4].innerHTML = response[i]["Date"];
                                 table.rows[i+1].cells[5].innerHTML = rateCache[ID]["Time"];
                                 table.rows[i+1].cells[6].innerHTML = TotalPrice;

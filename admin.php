@@ -557,9 +557,8 @@ case "setupServer":
     }
 
     $db_selected = mysql_select_db($DB_NAME, $connection);
-
     if (!$db_selected) {
-      $sql = 'CREATE DATABASE '.$DB_NAME;
+      $sql = 'CREATE DATABASE `'.$DB_NAME.'`;';
 
       if (mysql_query($sql, $connection)) {
           $response->results = "Created skyhigh database";
